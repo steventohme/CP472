@@ -14,3 +14,10 @@ typedef struct {
 
 Student students[MAX_STUDENTS];
 int student_count = 0;
+
+void add_student(int id, char name[], int age){
+    students[student_count].id = id;
+    strcpy(students[student_count].name, name);
+    students[student_count].age = age; 
+    student_count++;
+}
