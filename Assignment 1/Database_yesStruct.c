@@ -38,3 +38,19 @@ void display_all_students(){
         printf("ID: %d, Name: %s, Age: %d\n", students[i].id, students[i].name, students[i].age);
     }
 }
+
+int main(){
+    // Add students to database
+    add_student(1, "John", 20);
+    add_student(2, "Jane", 21);
+    add_student(3, "Jack", 22);
+    add_student(4, "Jill", 23);
+
+    // Display student that exists
+    display_student_by_id(1);
+    // Display student that does not exist
+    display_student_by_id(5);
+
+    // Display all students
+    display_all_students();
+}
