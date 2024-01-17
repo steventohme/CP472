@@ -34,3 +34,9 @@ void display_student_by_id(int id){
     }
     printf("Student not found\n");
 }
+
+void display_all_students(){
+    for (int i = 0; i < student_count; i++){
+        printf("ID: %d, Name: %s, Age: %d\n", student_ids[i], student_names[i], student_ages[i]);
+    }
+}
