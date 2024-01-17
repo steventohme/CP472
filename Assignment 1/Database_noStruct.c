@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #define MAX_STUDENTS 100
 
@@ -9,7 +10,7 @@ char student_names[MAX_STUDENTS][75];
 int student_ages[MAX_STUDENTS];
 int student_count = 0;
 
-void add_student(int id, char name[], int age[]) {
+void add_student(int id, char name[], int age) {
     // Check if database is full
     if (student_count >= MAX_STUDENTS) {
         printf("Database is full\n");
@@ -17,7 +18,7 @@ void add_student(int id, char name[], int age[]) {
     }
     // Add student to database
     student_ids[student_count] = id;
-    //strcpy(student_names[student_count], name);
+    strcpy(student_names[student_count], name);
     student_ages[student_count] = age;
     student_count++;
 }
