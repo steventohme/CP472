@@ -21,3 +21,15 @@ void add_student(int id, char name[], int age){
     students[student_count].age = age; 
     student_count++;
 }
+
+void display_student_by_id(int id){
+    // Find student in database
+    for (int i = 0; i < student_count; i++){
+        if (students[i].id == id){
+            printf("ID: %d, Name: %s, Age: %d\n", students[i].id, students[i].name, students[i].age);
+            return;
+        }
+    }
+    printf("Student not found\n");
+}
+
