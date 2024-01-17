@@ -17,10 +17,8 @@ void add_student(int id, char name[], int age[]) {
     }
     // Add student to database
     student_ids[student_count] = id;
-    strcpy(student_names[student_count], name);
-    for (int i = 0; i < 5; i++) {
-        student_ages[student_count] = age[i];
-    }
+    //strcpy(student_names[student_count], name);
+    student_ages[student_count] = age;
     student_count++;
 }
 
