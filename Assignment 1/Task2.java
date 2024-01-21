@@ -1,4 +1,4 @@
-public class Fibonacci {
+public class Task2 {
     public static void main(String[] args){
 
         if (args.length <= 0) {
