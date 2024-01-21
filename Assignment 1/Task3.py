@@ -19,6 +19,7 @@ def Matrix_While(mat1, mat2):
         return
     
     res_mat = [[0 for _ in range(len(mat2[0]))] for _ in range(len(mat1))]
+    
     i = 0
     while i < len(mat1):
         j = 0
