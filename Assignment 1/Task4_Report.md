@@ -14,6 +14,7 @@ The struct implementation uses a more organized approach by grouping related att
 In the array implementation, adding a new attribute (e.g., "grade") would involve modifications in multiple functions and arrays. The risk of introducing errors is higher, as changes need to be made consistently in different places. The code lacks encapsulation, making it more challenging to maintain.
 
 ### Struct Implementation
+The struct implementation demonstrates better code maintainability. When adding a new attribute, modifications are limited to the struct definition and the functions that use it. This encapsulation reduces the likelihood of errors and makes the code more modular. The struct implementation follows the principles of encapsulation and abstraction.
 
 ### Readability
 
