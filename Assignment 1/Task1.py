@@ -1,3 +1,5 @@
+ARRAY_SIZE = 7
+
 def bubble_sort(arr):
     # check if the input is a list
     if not isinstance(arr, list):
@@ -7,6 +9,11 @@ def bubble_sort(arr):
     # check if the input has values
     if len(arr) == 0:
         print("Error: Input is empty")
+        return
+    
+    # check if the input has the correct size
+    if len(arr) != ARRAY_SIZE:
+        print(f"Error: Input should have {ARRAY_SIZE} elements")
         return
 
     # check if all values are integers (to keep everything simple)
@@ -29,5 +36,5 @@ def bubble_sort(arr):
     return arr
 
 if __name__ == "__main__":
-    arr = [64, 34, 25, 12, 22, 11, 90]
+    arr = [64, 34, 25, 12, 22, 11,90]
     print(bubble_sort(arr))
