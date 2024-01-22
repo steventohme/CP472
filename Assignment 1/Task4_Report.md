@@ -25,3 +25,4 @@ The array implementation uses parallel arrays, making it less readable and more 
 The struct implementation improves readability by grouping related attributes together. Accessing student attributes involves using a single struct, which simplifies code comprehension. The use of a struct enhances the readability of function signatures, making it clear that they operate on student entities.
 
 ## Conclusion
+The struct implementation is superior in terms of data organization, code maintainability, and readability. It follows better programming practices and provides a more structured and modular approach to managing student information.
