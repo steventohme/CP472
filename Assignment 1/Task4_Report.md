@@ -19,5 +19,6 @@ The struct implementation demonstrates better code maintainability. When adding 
 ### Readability
 
 ### Array Implementation
+The array implementation uses parallel arrays, making it less readable and more error-prone. Understanding the relationships between different attributes (id, name, and age) requires keeping track of multiple arrays simultaneously. This can lead to confusion and hinder code comprehension.
 
 ### Struct Implementation
