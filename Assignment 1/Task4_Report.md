@@ -11,6 +11,7 @@ The struct implementation uses a more organized approach by grouping related att
 ## Code Maintainability
 
 ### Array Implementation
+In the array implementation, adding a new attribute (e.g., "grade") would involve modifications in multiple functions and arrays. The risk of introducing errors is higher, as changes need to be made consistently in different places. The code lacks encapsulation, making it more challenging to maintain.
 
 ### Struct Implementation
 
