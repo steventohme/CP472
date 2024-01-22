@@ -22,3 +22,4 @@ The struct implementation demonstrates better code maintainability. When adding 
 The array implementation uses parallel arrays, making it less readable and more error-prone. Understanding the relationships between different attributes (id, name, and age) requires keeping track of multiple arrays simultaneously. This can lead to confusion and hinder code comprehension.
 
 ### Struct Implementation
+The struct implementation improves readability by grouping related attributes together. Accessing student attributes involves using a single struct, which simplifies code comprehension. The use of a struct enhances the readability of function signatures, making it clear that they operate on student entities.
