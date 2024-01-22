@@ -11,3 +11,9 @@
 ### Array Implementation
 
 ### Struct Implementation
+
+### Readability
+
+### Array Implementation
+
+### Struct Implementation
