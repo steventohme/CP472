@@ -1,4 +1,4 @@
-ARRAY_SIZE = 7 # size of the fixed array
+ARRAY_SIZE = 7 # size of the fixed array, should match input size
 
 def bubble_sort(arr):
     # check if the input is a list
