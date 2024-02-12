@@ -52,9 +52,10 @@ def analyzeData(data: list[ClimateData]) -> None:
             max_temp_fluctuation = value.max_temperature - value.min_temperature
             max_temp_fluctuation_day = value.date
     
+    print("\n--Climate Data Analysis--")
     print(f"Month with the most precipitation: {convertDateTime(max_precipitation_month, "month")} with {max_precipitation}mm")
     print(f"Day with the highest gust: {convertDateTime(max_gust_day, "day")} with {max_gust}km/h")
-    print(f"Day with the highest temperature fluctuation: {convertDateTime(max_temp_fluctuation_day, "day")} with {max_temp_fluctuation:.2f}°C")
+    print(f"Day with the highest temperature fluctuation: {convertDateTime(max_temp_fluctuation_day, "day")} with {max_temp_fluctuation:.2f}°C\n")
 
 def userGeneratedReport(data: list[ClimateData]) -> None:
     while True:
@@ -109,4 +110,5 @@ def date_range_report(data: list[ClimateData], start_date: str, end_date:str):
 
 if __name__ == "__main__":
     data = parseClimateData("Assignment 2/climate-daily.csv")
+    analyzeData(data)
     userGeneratedReport(data)
