@@ -24,3 +24,15 @@ ClimateRecord* parse_line(char* line) {
     record->maxTemperature = atof(token);
     return record;
 }
+
+void parse_records(char* filename, ClimateRecord* records[], int* record_count) {
+    FILE* file = fopen(filename, "r");
+    char line[256];
+
+    while (fgets(line, sizeof(line), file)) {
+        ClimateRecord* record = parse_line(line);
+        records[(*record_count)++] = record;
+    }
+
+    fclose(file);
+}
