@@ -31,17 +31,17 @@ def convertDateTime(date: str, type: str) -> str:
 
 def analyze_data(data: list[ClimateData]) -> None:
 
-    max_percip_month = None
-    max_percip = 0
+    max_precipitation_month = None
+    max_precipitation = 0
     max_gust_day = None
     max_gust = 0
     max_temp_fluctuation_day = None
     max_temp_fluctuation = 0
 
     for value in data:
-        if value.total_precipitation > max_percip:
-            max_percip = value.total_precipitation
-            max_percip_month = value.date
+        if value.total_precipitation > max_precipitation:
+            max_precipitation = value.total_precipitation
+            max_precipitation_month = value.date
 
         if value.max_gust > max_gust:
             max_gust = value.max_gust
@@ -51,7 +51,7 @@ def analyze_data(data: list[ClimateData]) -> None:
             max_temp_fluctuation = value.max_temperature - value.min_temperature
             max_temp_fluctuation_day = value.date
     
-    print(f"Month with the most precipitation: {convertDateTime(max_percip_month, "month")} with {max_percip}mm")
+    print(f"Month with the most precipitation: {convertDateTime(max_precipitation_month, "month")} with {max_precipitation}mm")
     print(f"Day with the highest gust: {convertDateTime(max_gust_day, "day")} with {max_gust}km/h")
     print(f"Day with the highest temperature fluctuation: {convertDateTime(max_temp_fluctuation_day, "day")} with {max_temp_fluctuation:.2f}°C")
 
