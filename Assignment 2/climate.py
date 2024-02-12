@@ -95,6 +95,7 @@ def monthly_report(data: list[ClimateData]) -> None:
         print(f"Max Temperature: {values['max_temperature']:.2f}")
         print(f"Mean Temperature: {values['avg_temperature'] / values['count']:.2f}")
         print()
+
 def date_range_report(data: list[ClimateData], start_date: str, end_date:str):
 
     for value in data:
