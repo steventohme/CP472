@@ -25,7 +25,7 @@ def parseClimateData(filename: str) -> list[ClimateData]:
 def convertDateTime(date: str, type: str) -> str:
     months = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May", "06": "June", "07": "July", "08": "August", "09": "September", "10": "October", "11": "November", "12": "December"}
     if type == "day":
-        return f"{months[date.split('-')[1]]} {date.split('-')[2]}"
+        return f"{months[date.split('-')[1]]} {date.split('-')[2].split(' ')[0]}"
     elif type == "month":
         return months[date.split("-")[1]]
 
@@ -51,9 +51,9 @@ def analyze_data(data: list[ClimateData]) -> None:
             max_temp_fluctuation = value.max_temperature - value.min_temperature
             max_temp_fluctuation_day = value.date
     
-    print(f"Month with the most precipitation: {max_percip_month} with {max_percip}mm")
-    print(f"Day with the highest gust: {max_gust_day} with {max_gust}km/h")
-    print(f"Day with the highest temperature fluctuation: {max_temp_fluctuation_day} with {max_temp_fluctuation}°C")
+    print(f"Month with the most precipitation: {convertDateTime(max_percip_month, "month")} with {max_percip}mm")
+    print(f"Day with the highest gust: {convertDateTime(max_gust_day, "day")} with {max_gust}km/h")
+    print(f"Day with the highest temperature fluctuation: {convertDateTime(max_temp_fluctuation_day, "day")} with {max_temp_fluctuation:.2f}°C")
 
 if __name__ == "__main__":
     data = parseClimateData("Assignment 2/climate-daily.csv")
