@@ -62,7 +62,7 @@ void analyzeData(ClimateRecord* records[], int record_count) {
 
 int main() {
     int record_count = 0;
-    int record_capacity = 100; // Initial capacity
+    int record_capacity = 100;
 
     // Allocate initial memory
     ClimateRecord** records = malloc(record_capacity * sizeof(ClimateRecord*));
@@ -90,4 +90,33 @@ int main() {
     }
 
     return 0;
+}
+
+void userGeneratedReport(ClimateRecord** records, int record_count) {
+    int choice;
+    do {
+        printf("1. Monthly report\n");
+        printf("2. Weather records between two dates\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                monthly_report(records, record_count);
+                break;
+            case 2:
+                char start_date[11], end_date[11];
+                printf("Enter the start date (YYYY-MM-DD): ");
+                scanf("%s", start_date);
+                printf("Enter the end date (YYYY-MM-DD): ");
+                scanf("%s", end_date);
+                date_range_report(records, record_count, start_date, end_date);
+                break;
+            case 3:
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
 }
