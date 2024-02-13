@@ -25,7 +25,7 @@ class ClimateRecord {
 public class climate {
     public static void main(String[] args) {
         ArrayList<ClimateRecord> records = new ArrayList<>();
-        
+
         loadRecords(records);
         analyzeData(records);
 
@@ -76,7 +76,6 @@ public class climate {
                     ClimateRecord record = new ClimateRecord(date, maxGust, totalPrecipitation, minTemperature, maxTemperature, avgTemperature);
                     records.add(record);
                 } catch (NumberFormatException nfe) {
-                    System.out.println("Skipping line with invalid data: " + line);
                     continue;
                 }
                 
