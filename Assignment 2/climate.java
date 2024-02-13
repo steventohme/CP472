@@ -121,7 +121,7 @@ public class climate {
     public static void monthlyReport(ArrayList<ClimateRecord> records) {
         Map<String, ClimateRecord> monthlyRecords = new HashMap<>();
         for (ClimateRecord record : records) {
-            String month = record.date.getMonth().toString() + " " + record.date.getYear();
+            String month = record.date.getMonth().toString();
             ClimateRecord monthlyRecord = monthlyRecords.getOrDefault(month, new ClimateRecord(record.date, 0, 0, Float.MAX_VALUE, Float.MIN_VALUE, 0));
             monthlyRecord.maxGust += record.maxGust;
             monthlyRecord.totalPrecipitation += record.totalPrecipitation;

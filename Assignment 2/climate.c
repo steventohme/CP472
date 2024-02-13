@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <ctype.h>
 
 typedef struct {
     char date[20];
@@ -9,6 +11,16 @@ typedef struct {
     float minTemperature;
     float maxTemperature;
 } ClimateRecord;
+
+int is_valid_int(char* str) {
+    while (*str) {
+        if (!isdigit(*str)) {
+            return 0;
+        }
+        str++;
+    }
+    return 1;
+}
 
 ClimateRecord* parse_line(char* line) {
     ClimateRecord* record = malloc(sizeof(ClimateRecord));
@@ -27,7 +39,7 @@ ClimateRecord* parse_line(char* line) {
     strcpy(record->date, token);
 
     token = strtok(NULL, ",");
-    if (token == NULL) {
+    if (token == NULL || !is_valid_int(token)) {
         if (record != NULL) {
             free(record);
         }
@@ -120,6 +132,29 @@ void date_range_report(ClimateRecord** records, int record_count, char* start_da
     }
 }
 
+void monthly_report(ClimateRecord** records, int record_count) {
+    ClimateRecord monthlyRecords[12] = {0};
+
+    for (int i = 0; i < record_count; i++) {
+        ClimateRecord* record = records[i];
+        
+        int month = atoi(&record->date[5]) - 1;
+
+        monthlyRecords[month].maxGust += record->maxGust;
+        monthlyRecords[month].totalPrecipitation += record->totalPrecipitation;
+        monthlyRecords[month].minTemperature = fminf(monthlyRecords[month].minTemperature, record->minTemperature);
+        monthlyRecords[month].maxTemperature = fmaxf(monthlyRecords[month].maxTemperature, record->maxTemperature);
+    }
+
+    for (int i = 0; i < 12; i++) {
+        printf("\nMonth: %d\n", i + 1);
+        printf("Max Gust: %dkm/h\n", monthlyRecords[i].maxGust);
+        printf("Total Precipitation: %.2fmm\n", monthlyRecords[i].totalPrecipitation);
+        printf("Min Temperature: %.2f°C\n", monthlyRecords[i].minTemperature);
+        printf("Max Temperature: %.2f°C\n", monthlyRecords[i].maxTemperature);
+    }
+}
+
 void userGeneratedReport(ClimateRecord** records, int record_count) {
     int choice;
     char start_date[20];
@@ -133,7 +168,7 @@ void userGeneratedReport(ClimateRecord** records, int record_count) {
 
         switch (choice) {
             case 1:
-                // monthly_report(records, record_count);
+                monthly_report(records, record_count);
                 break;
             case 2:
                 printf("Enter the start date (YYYY-MM-DD): ");
@@ -168,6 +203,10 @@ int main() {
         }
 
         ClimateRecord* record = parse_line(line);
+        if (record == NULL) {
+            fprintf(stderr, "Failed to parse line: %s\n", line);
+            continue;
+        }
         records[record_count++] = record;
     }
 
