@@ -25,17 +25,6 @@ ClimateRecord* parse_line(char* line) {
     return record;
 }
 
-void parse_records(char* filename, ClimateRecord* records[], int* record_count) {
-    FILE* file = fopen(filename, "r");
-    char line[256];
-
-    while (fgets(line, sizeof(line), file)) {
-        ClimateRecord* record = parse_line(line);
-        records[(*record_count)++] = record;
-    }
-
-    fclose(file);
-}
 
 void analyzeData(ClimateRecord* records[], int record_count) {
     char* maxPrecipitationDate = NULL;
@@ -72,10 +61,28 @@ void analyzeData(ClimateRecord* records[], int record_count) {
 }
 
 int main() {
-    ClimateRecord* records[100];
     int record_count = 0;
+    int record_capacity = 100; // Initial capacity
 
-    parse_records("climate.csv", records, &record_count);
+    // Allocate initial memory
+    ClimateRecord** records = malloc(record_capacity * sizeof(ClimateRecord*));
+
+    FILE* file = fopen("climate.csv", "r");
+    char line[256];
+
+    while (fgets(line, sizeof(line), file)) {
+        // Resize the array if needed
+        if (record_count == record_capacity) {
+            record_capacity *= 2;
+            records = realloc(records, record_capacity * sizeof(ClimateRecord*));
+        }
+
+        ClimateRecord* record = parse_line(line);
+        records[record_count++] = record;
+    }
+
+    fclose(file);
+
     analyzeData(records, record_count);
 
     for (int i = 0; i < record_count; i++) {
