@@ -71,3 +71,16 @@ void analyzeData(ClimateRecord* records[], int record_count) {
     printf("Day with the highest temperature fluctuation: %s with %.2f°C\n", maxTempFluctuationDate, maxTempFluctuation);
 }
 
+int main() {
+    ClimateRecord* records[100];
+    int record_count = 0;
+
+    parse_records("climate.csv", records, &record_count);
+    analyzeData(records, record_count);
+
+    for (int i = 0; i < record_count; i++) {
+        free(records[i]);
+    }
+
+    return 0;
+}
