@@ -36,3 +36,4 @@ void parse_records(char* filename, ClimateRecord* records[], int* record_count) 
 
     fclose(file);
 }
+
