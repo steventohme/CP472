@@ -37,3 +37,37 @@ void parse_records(char* filename, ClimateRecord* records[], int* record_count) 
     fclose(file);
 }
 
+void analyzeData(ClimateRecord* records[], int record_count) {
+    char* maxPrecipitationDate = NULL;
+    float maxPrecipitation = 0;
+    char* maxGustDate = NULL;
+    int maxGust = 0;
+    char* maxTempFluctuationDate = NULL;
+    float maxTempFluctuation = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        ClimateRecord* record = records[i];
+
+        if (record->totalPrecipitation > maxPrecipitation) {
+            maxPrecipitation = record->totalPrecipitation;
+            maxPrecipitationDate = record->date;
+        }
+
+        if (record->maxGust > maxGust) {
+            maxGust = record->maxGust;
+            maxGustDate = record->date;
+        }
+
+        float tempFluctuation = record->maxTemperature - record->minTemperature;
+        if (tempFluctuation > maxTempFluctuation) {
+            maxTempFluctuation = tempFluctuation;
+            maxTempFluctuationDate = record->date;
+        }
+    }
+
+    printf("\n--Climate Data Analysis--\n");
+    printf("Day with the most precipitation: %s with %.2fmm\n", maxPrecipitationDate, maxPrecipitation);
+    printf("Day with the highest gust: %s with %dkm/h\n", maxGustDate, maxGust);
+    printf("Day with the highest temperature fluctuation: %s with %.2f°C\n", maxTempFluctuationDate, maxTempFluctuation);
+}
+
