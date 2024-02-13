@@ -28,7 +28,7 @@ def convertDateTime(date: str, type: str) -> str:
     if type == "day":
         return f"{months[date.split('-')[1]]} {date.split('-')[2].split(' ')[0]} {date.split("-")[0]}"
     elif type == "month":
-        return f"{months[date.split("-")[1]]} {date.split("-")[0]}"
+        return f"{months[date.split("-")[1]]}"
 
 def analyzeData(data: list[ClimateData]) -> None:
 
