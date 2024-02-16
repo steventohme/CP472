@@ -1,4 +1,5 @@
 from collections import defaultdict
+import time
 class ClimateData:
 
     def __init__(self, date: str, max_gust: int, total_precipitation: float, min_temperature: float, max_temperature: float, avg_temperature: float):
@@ -65,7 +66,10 @@ def userGeneratedReport(data: list[ClimateData]) -> None:
         choice = input("Enter your choice: ")
 
         if choice == '1':
+            start_time = time.time()
             monthly_report(data)
+            end_time = time.time()
+            print(f"Monthly report took {end_time - start_time} seconds to run.")
         elif choice == '2':
             start_date = input("Enter the start date (YYYY-MM-DD): ")
             end_date = input("Enter the end date (YYYY-MM-DD): ")

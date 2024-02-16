@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <ctype.h>
 
 typedef struct {
@@ -168,7 +169,13 @@ void userGeneratedReport(ClimateRecord** records, int record_count) {
 
         switch (choice) {
             case 1:
-                monthly_report(records, record_count);
+                    {
+                    clock_t start = clock();
+                    monthly_report(records, record_count);
+                    clock_t end = clock();
+                    double duration = ((double) (end - start)) / CLOCKS_PER_SEC;
+                    printf("Monthly report took %f seconds\n", duration);
+                }
                 break;
             case 2:
                 printf("Enter the start date (YYYY-MM-DD): ");

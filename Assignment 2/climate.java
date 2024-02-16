@@ -39,7 +39,12 @@ public class climate {
             scanner.close();
 
             if (choice.equals("1")) {
+                long startTime = System.nanoTime();
                 monthlyReport(records);
+                long endTime = System.nanoTime();
+                long duration = (endTime - startTime);  
+                double durationInSeconds = (double)duration / 1_000_000_000;
+                System.out.println("Monthly report took " + durationInSeconds + " seconds");
             } else if (choice.equals("2")) {
                 System.out.println("Enter the start date (YYYY-MM-DD): ");
                 String startDate = scanner.nextLine();
