@@ -28,7 +28,7 @@ int is_valid_int(char* str) {
     }
     return 1;
 }
-
+// Function to parse a line from the CSV file
 ClimateRecord* parse_line(char* line) {
     ClimateRecord* record = malloc(sizeof(ClimateRecord));
     if (record == NULL) {
@@ -89,7 +89,7 @@ ClimateRecord* parse_line(char* line) {
     return record;
 }
 
-
+// Function to analyze the data
 void analyzeData(ClimateRecord* records[], int record_count) {
     char* maxGustDate = NULL;
     int maxGust = 0;
@@ -103,8 +103,6 @@ void analyzeData(ClimateRecord* records[], int record_count) {
 
     for (int i = 0; i < record_count; i++) {
         ClimateRecord* record = records[i];
-        // printf("%s\n", record->date);
-        // printf("%f\n", record->totalPrecipitation);
         if (record == NULL) {
             continue;
         }
@@ -159,6 +157,7 @@ void analyzeData(ClimateRecord* records[], int record_count) {
     printf("Day with the highest temperature fluctuation: %s with %.2f°C\n", maxTempFluctuationDate, maxTempFluctuation);
 }
 
+// Function to print the records between two dates
 void date_range_report(ClimateRecord** records, int record_count, char* start_date, char* end_date) {
     for (int i = 0; i < record_count; i++) {
         ClimateRecord* record = records[i];
@@ -175,7 +174,7 @@ void date_range_report(ClimateRecord** records, int record_count, char* start_da
         }
     }
 }
-
+// Function to print the monthly report
 void monthly_report(ClimateRecord** records, int record_count) {
     ClimateRecord monthlyRecords[12] = {0};
 
@@ -199,6 +198,7 @@ void monthly_report(ClimateRecord** records, int record_count) {
     }
 }
 
+// Function to generate user reports
 void userGeneratedReport(ClimateRecord** records, int record_count) {
     int choice;
     char start_date[20];

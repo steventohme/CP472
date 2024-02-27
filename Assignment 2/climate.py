@@ -10,6 +10,7 @@ class ClimateData:
         self.max_temperature = max_temperature
         self.avg_temperature = avg_temperature
 
+# Function to parse the climate data from the file
 def parseClimateData(filename: str) -> list[ClimateData]:
     data = []
 
@@ -24,6 +25,8 @@ def parseClimateData(filename: str) -> list[ClimateData]:
                 continue
     
     return data
+
+# Function to convert the date from the format YYYY-MM-DD to a more readable format
 def convertDateTime(date: str, type: str) -> str:
     months = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May", "06": "June", "07": "July", "08": "August", "09": "September", "10": "October", "11": "November", "12": "December"}
     if type == "day":
@@ -31,6 +34,7 @@ def convertDateTime(date: str, type: str) -> str:
     elif type == "month":
         return f"{months[date.split("-")[1]]} {date.split("-")[0]}"
 
+# Function to analyze the climate data
 def analyzeData(data: list[ClimateData]) -> None:
 
     max_precipitation = 0
@@ -58,6 +62,7 @@ def analyzeData(data: list[ClimateData]) -> None:
     print(f"Day with the highest gust: {convertDateTime(max_gust_day, "day")} with {max_gust}km/h")
     print(f"Day with the highest temperature fluctuation: {convertDateTime(max_temp_fluctuation_day, "day")} with {max_temp_fluctuation:.2f}°C\n")
 
+# Function to generate a user generated report
 def userGeneratedReport(data: list[ClimateData]) -> None:
     while True:
         print("1. Monthly report")
@@ -79,6 +84,7 @@ def userGeneratedReport(data: list[ClimateData]) -> None:
         else:
             print("Invalid choice. Please try again.")
 
+# Function to generate a monthly report
 def monthly_report(data: list[ClimateData]) -> None:
     # create a dictionary with default values for each month
     months = defaultdict(lambda: {"count": 0, "max_gust": 0, "total_precipitation": 0, "min_temperature": float('inf'), "max_temperature": float('-inf'), "avg_temperature": 0})
@@ -101,6 +107,7 @@ def monthly_report(data: list[ClimateData]) -> None:
         print(f"Mean Temperature: {values['avg_temperature'] / values['count']:.2f}")
         print()
 
+# Function to generate a report for a date range
 def date_range_report(data: list[ClimateData], start_date: str, end_date:str):
 
     for value in data:

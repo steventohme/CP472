@@ -58,7 +58,7 @@ public class climate {
             }
         }
     }
-
+    // Load records from the file
     public static void loadRecords(ArrayList<ClimateRecord> records) {
         Path pathToFile = Paths.get("climate-daily.csv");
 
@@ -90,6 +90,7 @@ public class climate {
         }
     }
 
+    // Analyze the data
     public static void analyzeData(ArrayList<ClimateRecord> records) {
         Map<String, Float> precipitationPerMonth = new HashMap<>();
         LocalDate maxGustDay = null;
@@ -126,7 +127,7 @@ public class climate {
         System.out.println("Day with the highest temperature fluctuation: " + maxTempFluctuationDay + " with " + String.format("%.2f", maxTempFluctuation) + "°C\n");
     }
 
-
+    // Generate monthly report
     public static void monthlyReport(ArrayList<ClimateRecord> records) {
         Map<String, ClimateRecord> monthlyRecords = new HashMap<>();
         for (ClimateRecord record : records) {
@@ -153,6 +154,7 @@ public class climate {
         }
     }
 
+    // Generate report for a date range
     public static void dateRangeReport(ArrayList<ClimateRecord> records, LocalDate startDate, LocalDate endDate) {
         for (ClimateRecord record : records) {
             if (record.date.isAfter(startDate) && record.date.isBefore(endDate)) {
