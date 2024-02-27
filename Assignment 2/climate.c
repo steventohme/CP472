@@ -11,7 +11,13 @@ typedef struct {
     float totalPrecipitation;
     float minTemperature;
     float maxTemperature;
+    float meanTemperature;
 } ClimateRecord;
+
+typedef struct {
+    char month[8];
+    float totalPrecipitation;
+} monthlyPrecipitation;
 
 int is_valid_int(char* str) {
     while (*str) {
@@ -31,71 +37,99 @@ ClimateRecord* parse_line(char* line) {
     }
 
     char* token = strtok(line, ",");
-    if (token == NULL) {
-        if (record != NULL) {
-            free(record);
-        }
+    if (token == NULL || token[0] == '\0') {
+        free(record);
         return NULL;
     }
     strcpy(record->date, token);
 
     token = strtok(NULL, ",");
-    if (token == NULL || !is_valid_int(token)) {
-        if (record != NULL) {
-            free(record);
-        }
+    if (token == NULL || token[0] == '\0') {
+        free(record);
         return NULL;
     }
     record->maxGust = atoi(token);
 
     token = strtok(NULL, ",");
-    if (token == NULL) {
-        if (record != NULL) {
-            free(record);
-        }
+    if (token == NULL || token[0] == '\0') {
+        free(record);
         return NULL;
     }
     record->totalPrecipitation = atof(token);
 
     token = strtok(NULL, ",");
-    if (token == NULL) {
-        if (record != NULL) {
-            free(record);
-        }
+    if (token == NULL || token[0] == '\0') {
+        free(record);
         return NULL;
     }
     record->minTemperature = atof(token);
 
     token = strtok(NULL, ",");
-    if (token == NULL) {
-        if (record != NULL) {
-            free(record);
-        }
+    if (token == NULL || token[0] == '\0') {
+        free(record);
         return NULL;
     }
     record->maxTemperature = atof(token);
+
+    token = strtok(NULL, ",");
+    if (token == NULL || token[0] == '\0') {
+        free(record);
+        return NULL;
+    }
+    record->meanTemperature = atof(token);
+
+    // print all record data
+    printf("%s\n", record->date);
+    printf("%d\n", record->maxGust);
+    printf("%f\n", record->totalPrecipitation);
+    printf("%f\n", record->minTemperature);
+    printf("%f\n", record->maxTemperature);
+    printf("%f\n", record->meanTemperature);
 
     return record;
 }
 
 
 void analyzeData(ClimateRecord* records[], int record_count) {
-    char* maxPrecipitationDate = NULL;
-    float maxPrecipitation = 0;
     char* maxGustDate = NULL;
     int maxGust = 0;
     char* maxTempFluctuationDate = NULL;
     float maxTempFluctuation = 0;
 
+    int monthlyPrecipitationSize = 100;
+    monthlyPrecipitation* monthlyPrecipitations = malloc(monthlyPrecipitationSize * sizeof(monthlyPrecipitation));
+    int monthlyPrecipitationCount = 0;
+
+
     for (int i = 0; i < record_count; i++) {
         ClimateRecord* record = records[i];
+        // printf("%s\n", record->date);
+        // printf("%f\n", record->totalPrecipitation);
         if (record == NULL) {
             continue;
         }
 
-        if ( record->totalPrecipitation > maxPrecipitation) {
-            maxPrecipitation = record->totalPrecipitation;
-            maxPrecipitationDate = record->date;
+        char month[8];
+        strncpy(month, record->date, 7);
+        month[7] = '\0';
+
+        int found = 0;
+        for (int j = 0; j < monthlyPrecipitationCount; j++) {
+            if (strcmp(monthlyPrecipitations[j].month, month) == 0) {
+                monthlyPrecipitations[j].totalPrecipitation += record->totalPrecipitation;
+                found = 1;
+                break;
+            }
+        }
+        
+        if (!found) {
+            if (monthlyPrecipitationCount == monthlyPrecipitationSize) {
+                monthlyPrecipitationSize *= 2;
+                monthlyPrecipitations = realloc(monthlyPrecipitations, monthlyPrecipitationSize * sizeof(monthlyPrecipitation));
+            }
+            strcpy(monthlyPrecipitations[monthlyPrecipitationCount].month, month);
+            monthlyPrecipitations[monthlyPrecipitationCount].totalPrecipitation = record->totalPrecipitation;
+            monthlyPrecipitationCount++;
         }
 
         if (record->maxGust > maxGust) {
@@ -110,8 +144,17 @@ void analyzeData(ClimateRecord* records[], int record_count) {
         }
     }
 
+    char maxPrecipitationMonth[8] = "";
+    float maxPrecipitation = 0;
+    for (int i = 0; i < monthlyPrecipitationCount; i++) {
+        if (monthlyPrecipitations[i].totalPrecipitation > maxPrecipitation) {
+            maxPrecipitation = monthlyPrecipitations[i].totalPrecipitation;
+            strcpy(maxPrecipitationMonth, monthlyPrecipitations[i].month);
+        }
+    }
+
     printf("\n--Climate Data Analysis--\n");
-    printf("Day with the most precipitation: %s with %.2fmm\n", maxPrecipitationDate, maxPrecipitation);
+    printf("Month with the most precipitation: %s with %.2fmm\n", maxPrecipitationMonth, maxPrecipitation);
     printf("Day with the highest gust: %s with %dkm/h\n", maxGustDate, maxGust);
     printf("Day with the highest temperature fluctuation: %s with %.2f°C\n", maxTempFluctuationDate, maxTempFluctuation);
 }

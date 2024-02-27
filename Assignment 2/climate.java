@@ -130,19 +130,21 @@ public class climate {
     public static void monthlyReport(ArrayList<ClimateRecord> records) {
         Map<String, ClimateRecord> monthlyRecords = new HashMap<>();
         for (ClimateRecord record : records) {
-            String month = record.date.getMonth().toString();
-            ClimateRecord monthlyRecord = monthlyRecords.getOrDefault(month, new ClimateRecord(record.date, 0, 0, Float.MAX_VALUE, Float.MIN_VALUE, 0));
-            monthlyRecord.maxGust += record.maxGust;
+            String monthYear = record.date.getMonth().toString() + "-" + record.date.getYear();
+            ClimateRecord monthlyRecord = monthlyRecords.getOrDefault(monthYear, new ClimateRecord(record.date, 0, 0, Float.MAX_VALUE, Float.MIN_VALUE, 0));
+            if (monthlyRecord.maxGust < record.maxGust) {
+                monthlyRecord.maxGust = record.maxGust;
+            }
             monthlyRecord.totalPrecipitation += record.totalPrecipitation;
             monthlyRecord.minTemperature = Math.min(monthlyRecord.minTemperature, record.minTemperature);
             monthlyRecord.maxTemperature = Math.max(monthlyRecord.maxTemperature, record.maxTemperature);
             monthlyRecord.avgTemperature += record.avgTemperature;
-            monthlyRecords.put(month, monthlyRecord);
+            monthlyRecords.put(monthYear, monthlyRecord);
         }
-
+    
         for (Map.Entry<String, ClimateRecord> entry : monthlyRecords.entrySet()) {
             ClimateRecord record = entry.getValue();
-            System.out.println("Month: " + entry.getKey());
+            System.out.println("Month-Year: " + entry.getKey());
             System.out.println("Max Gust: " + record.maxGust);
             System.out.println("Total Precipitation: " + record.totalPrecipitation);
             System.out.println("Min Temperature: " + record.minTemperature);
