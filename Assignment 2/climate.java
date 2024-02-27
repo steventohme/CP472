@@ -91,18 +91,15 @@ public class climate {
     }
 
     public static void analyzeData(ArrayList<ClimateRecord> records) {
-        String maxPrecipitationMonth = null;
-        float maxPrecipitation = 0;
+        Map<String, Float> precipitationPerMonth = new HashMap<>();
         LocalDate maxGustDay = null;
         int maxGust = 0;
         LocalDate maxTempFluctuationDay = null;
         float maxTempFluctuation = 0;
     
         for (ClimateRecord record : records) {
-            if (record.totalPrecipitation > maxPrecipitation) {
-                maxPrecipitation = record.totalPrecipitation;
-                maxPrecipitationMonth = record.date.getMonth().toString() + " " + record.date.getYear();
-            }
+            String monthKey = record.date.format(DateTimeFormatter.ofPattern("MM-yyyy"));
+            precipitationPerMonth.put(monthKey, precipitationPerMonth.getOrDefault(monthKey, 0f) + record.totalPrecipitation);
     
             if (record.maxGust > maxGust) {
                 maxGust = record.maxGust;
@@ -116,10 +113,17 @@ public class climate {
             }
         }
     
+        Map.Entry<String, Float> maxEntry = null;
+        for (Map.Entry<String, Float> entry : precipitationPerMonth.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+    
         System.out.println("\n--Climate Data Analysis--");
-        System.out.println("Month with the most precipitation: " + maxPrecipitationMonth + " with " + maxPrecipitation + "mm");
+        System.out.println("Month with the most precipitation: " + maxEntry.getKey() + " with " + String.format("%.2f", maxEntry.getValue()) + "mm");
         System.out.println("Day with the highest gust: " + maxGustDay + " with " + maxGust + "km/h");
-        System.out.println("Day with the highest temperature fluctuation: " + maxTempFluctuationDay + " with " + maxTempFluctuation + "°C\n");
+        System.out.println("Day with the highest temperature fluctuation: " + maxTempFluctuationDay + " with " + String.format("%.2f", maxTempFluctuation) + "°C\n");
     }
 
 
