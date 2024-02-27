@@ -21,5 +21,5 @@ C, as a low-level compiled language, offered the fastest execution time by a sig
 ||Readability | Ease of Debugging | Development Speed | Execution Time for monthly report generation (sec)| Lines of Code |
 |---|---|---|---|---|---|
 |**Python**| R1 | R2 | R1 | 0.011066 | 118
-|**Java** | R3 | R1 | R2 | 0.011353 | 162
-|**C** | R2 | R3 | R3 | 0.000343 | 230
+|**Java** | R3 | R1 | R2 | 0.011353 | 168
+|**C** | R2 | R3 | R3 | 0.000343 | 273
