@@ -22,6 +22,13 @@ class SavingsAccount(BankAccount):
     def __init__(self, accountNumber, accountHolderName, balance=0.0, minBalance=100.0):
         super().__init__(accountNumber, accountHolderName, balance)
         self.minBalance = minBalance
+    
+    def withdraw(self, amount):
+        if amount > 0 and (self.balance - amount) >= self.minBalance:
+            self.balance -= amount
+            print(f"Withdrew ${amount}. New balance: ${self.balance}")
+        else:
+            print("Invalid withdrawal amount or would violate minimum balance for savings account.")
 
 class CheckingAccount(BankAccount):
     def __init__(self, accountNumber, accountHolderName, balance=0.0):
