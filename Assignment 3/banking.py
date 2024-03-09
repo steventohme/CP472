@@ -10,6 +10,13 @@ class BankAccount:
             print(f"Deposited ${amount}. New balance: ${self.balance}")
         else:
             print("Invalid deposit amount.")
+    
+    def withdraw(self, amount):
+        if amount > 0 and amount <= self.balance:
+            self.balance -= amount
+            print(f"Withdrew ${amount}. New balance: ${self.balance}")
+        else:
+            print("Invalid withdrawal amount or insufficient funds.")
 
 class SavingsAccount(BankAccount):
     def __init__(self, accountNumber, accountHolderName, balance=0.0, minBalance=100.0):
