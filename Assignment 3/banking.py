@@ -3,6 +3,13 @@ class BankAccount:
         self.accountNumber = accountNumber
         self.accountHolderName = accountHolderName
         self.balance = balance
+    
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            print(f"Deposited ${amount}. New balance: ${self.balance}")
+        else:
+            print("Invalid deposit amount.")
 
 class SavingsAccount(BankAccount):
     def __init__(self, accountNumber, accountHolderName, balance=0.0, minBalance=100.0):
