@@ -71,20 +71,25 @@ class CheckingAccount(BankAccount):
 
 
 class LoanAccount(BankAccount):
-    def __init__(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration, balance=0.0):
-        super().__init__(accountNumber, accountHolderName, balance)
+    def __init__(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration):
+        super().__init__(accountNumber, accountHolderName)
         self.loan_amount = loan_amount
         self.interest_rate = interest_rate
         self.loan_duration = loan_duration
         self.monthly_payment = (loan_amount * interest_rate * (1 + interest_rate) ** loan_duration) / ((1 + interest_rate) ** loan_duration - 1)
 
-    def make_payment(self, amount):
-        if amount > 0 and amount <= self.balance:
-            self.balance -= amount
-            print(f"Account: #{self.accountNumber} Made a payment of ${amount}. Remaining balance: ${self.balance}\n")
-            self.transaction_history.add_transaction(Transaction(amount, "payment", self.accountNumber))
+    def make_payment(self, amount, account:BankAccount=None):
+        if self.loan_amount - amount >= 0:
+            account.withdraw(amount)
+            self.loan_amount -= amount
+            print(f"Account: #{account.accountNumber} Made a payment of ${amount}. Remaining balance: ${account.balance}\n")
+            self.transaction_history.add_transaction(Transaction(amount, "payment", account.accountNumber))
+            print(f"Remaining Loan Balance: {self.calculate_remaining_balance()}\n")
         else:
-            print("Invalid payment amount or insufficient funds.\n")
+            print("Invalid payment amount or would exceed loan balance.\n")
+        
+    def make_monthly_payment(self, account):
+        self.make_payment(self.monthly_payment, account)
 
     def calculate_remaining_balance(self):
         return self.loan_amount - self.balance
@@ -104,13 +109,12 @@ class CreditCardAccount(BankAccount):
         else:
             print("Invalid purchase amount or would exceed credit limit.\n")
 
-    def make_payment(self, amount):
-        if amount > 0 and amount <= self.balance:
-            self.balance -= amount
-            print(f"Account: #{self.accountNumber} Made a payment of ${amount}. Remaining balance: ${self.balance}\n")
-            self.transaction_history.add_transaction(Transaction(amount, "payment", self.accountNumber))
-        else:
-            print("Invalid payment amount or insufficient funds.\n")
+    def make_payment(self, amount, account:BankAccount):
+        account.withdraw(amount)
+        self.balance -= amount
+        print(f"Account: #{account.accountNumber} Made a payment of ${amount}. Remaining balance: ${account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "payment", account.accountNumber))
+        print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
 
     def calculate_remaining_credit(self):
         return self.credit_limit - self.balance
@@ -173,11 +177,11 @@ class User:
             print("Insufficient funds for transfer.\n")
 
 class Store:
-    def __init__(self, storeName, storeOwner: User):
+    def __init__(self, storeName:str, storeOwner: User):
         self.storeName = storeName
         self.storeOwner = storeOwner
     
-    def sellItem(self, item, price, buyer: User):
+    def sellItem(self, item:str, price:float, buyer: User):
         print(f"Store: {self.storeName} selling item: {item} for ${price} to User: {buyer.username}.\n")
         if buyer.credit_card_account.balance >= price:
             buyer.credit_card_account.make_purchase(price)
@@ -185,7 +189,7 @@ class Store:
         else:
             print("Insufficient funds for purchase.\n")
     
-    def refundItem(self, item, price, buyer: User):
+    def refundItem(self, item:str, price:float, buyer: User):
         print(f"Store: {self.storeName} refunding item: {item} for ${price} to User: {buyer.username}.\n")
         if buyer.credit_card_account.balance >= price:
             buyer.credit_card_account.make_payment(price)
@@ -225,11 +229,9 @@ if __name__ == "__main__":
 
     user1.create_loan_account(789, "user1", 10000, 0.05, 12, 0)
     user1.loan_account.make_payment(200)
-    print(f"Remaining Loan Balance: {user1.loan_account.calculate_remaining_balance()}")
 
     user1.create_credit_card_account(101, "user1", 5000, 0.1, 0)
     user1.credit_card_account.make_purchase(1000)
     user1.credit_card_account.make_payment(500)
 
-    print(f"Remaining Credit: {user1.credit_card_account.calculate_remaining_credit()}")
 
