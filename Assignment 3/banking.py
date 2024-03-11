@@ -169,7 +169,27 @@ class User:
         else:
             print("Insufficient funds for transfer.\n")
 
-
+class Store:
+    def __init__(self, storeName, storeOwner: User):
+        self.storeName = storeName
+        self.storeOwner = storeOwner
+    
+    def sellItem(self, item, price, buyer: User):
+        print(f"Store: {self.storeName} selling item: {item} for ${price} to User: {buyer.username}.\n")
+        if buyer.credit_card_account.balance >= price:
+            buyer.credit_card_account.make_purchase(price)
+            self.storeOwner.credit_card_account.make_payment(price)
+        else:
+            print("Insufficient funds for purchase.\n")
+    
+    def refundItem(self, item, price, buyer: User):
+        print(f"Store: {self.storeName} refunding item: {item} for ${price} to User: {buyer.username}.\n")
+        if buyer.credit_card_account.balance >= price:
+            buyer.credit_card_account.make_payment(price)
+            self.storeOwner.credit_card_account.make_purchase(price)
+        else:
+            print("Insufficient funds for refund.\n")
+    
 if __name__ == "__main__":
 
     user1 = User("user1")
