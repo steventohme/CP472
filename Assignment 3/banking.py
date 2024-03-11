@@ -26,6 +26,62 @@ class TransactionHistory:
 
     def __str__(self):
         return ", ".join([str(transaction) for transaction in self.transactions])
+    
+class User:
+    def __init__(self, username, checking_account=None, savings_account=None, loan_account=None, credit_card_account=None):
+        self.username = username
+        self.checking_account = checking_account
+        self.savings_account = savings_account
+        self.loan_account = loan_account
+        self.credit_card_account = credit_card_account
+    
+    def create_checking_account(self, accountNumber, accountHolderName, balance):
+        self.checking_account = CheckingAccount(accountNumber, accountHolderName, balance)
+        print(f"User: {self.username} created checking account: #{accountNumber} with balance: ${balance}.\n")
+    
+    def create_savings_account(self, accountNumber, accountHolderName, balance):
+        self.savings_account = SavingsAccount(accountNumber, accountHolderName, balance)
+        print(f"User: {self.username} created savings account: #{accountNumber} with balance: ${balance}.\n")
+    
+    def create_loan_account(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration):
+        self.loan_account = LoanAccount(accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration)
+        print(f"User: {self.username} created loan account: #{accountNumber} with loan amount: ${loan_amount}.\n")
+    
+    def create_credit_card_account(self, accountNumber, accountHolderName, credit_limit, interest_rate, balance):
+        self.credit_card_account = CreditCardAccount(accountNumber, accountHolderName, credit_limit, interest_rate, balance)
+        print(f"User: {self.username} created credit card account: #{accountNumber} with credit limit: ${credit_limit}.\n")
+    
+    def deposit_to_checking(self, amount):
+        self.checking_account.deposit(amount)
+    
+    def deposit_to_savings(self, amount):
+        self.savings_account.deposit(amount)
+    
+    def withdraw_from_checking(self, amount):
+        self.checking_account.withdraw(amount)
+    
+    def withdraw_from_savings(self, amount):
+        self.savings_account.withdraw(amount)
+    
+    def transfer_to_user_savings(self, amount, user):
+        print(f"User: {self.username} transferring ${amount} to User: {user.username}'s savings account.\n")
+        if self.checking_account.balance >= amount:
+            self.checking_account.withdraw(amount)
+            user.savings_account.deposit(amount)
+            self.checking_account.transaction_history.add_transaction(Transaction(amount, "transfer", user.savings_account.accountNumber))
+            user.savings_account.transaction_history.add_transaction(Transaction(amount, "deposit", user.savings_account.accountNumber))
+        else:
+            print("Insufficient funds for transfer.\n")
+
+    def transfer_to_user_checking(self, amount, user):
+        print(f"User: {self.username} transferring ${amount} to User: {user.username}'s checking account.\n")
+        if self.savings_account.balance >= amount:
+            self.savings_account.withdraw(amount)
+            user.checking_account.deposit(amount)
+            self.savings_account.transaction_history.add_transaction(Transaction(amount, "transfer", user.checking_account.accountNumber))
+            user.checking_account.transaction_history.add_transaction(Transaction(amount, "deposit", user.checking_account.accountNumber))
+        else:
+            print("Insufficient funds for transfer.\n")
 
 
 class BankAccount:
@@ -77,19 +133,20 @@ class LoanAccount(BankAccount):
         self.interest_rate = interest_rate
         self.loan_duration = loan_duration
         self.monthly_payment = (loan_amount * interest_rate * (1 + interest_rate) ** loan_duration) / ((1 + interest_rate) ** loan_duration - 1)
-
-    def make_payment(self, amount, account:BankAccount=None):
-        if self.loan_amount - amount >= 0:
-            account.withdraw(amount)
-            self.loan_amount -= amount
-            print(f"Account: #{account.accountNumber} Made a payment of ${amount}. Remaining balance: ${account.balance}\n")
-            self.transaction_history.add_transaction(Transaction(amount, "payment", account.accountNumber))
-            print(f"Remaining Loan Balance: {self.calculate_remaining_balance()}\n")
-        else:
-            print("Invalid payment amount or would exceed loan balance.\n")
-        
-    def make_monthly_payment(self, account):
-        self.make_payment(self.monthly_payment, account)
+    
+    def make_monthly_payment_checking(self, user:User):
+        user.withdraw_from_checking(self.monthly_payment)
+        self.balance -= self.monthly_payment
+        print(f"Account: #{user.checking_account.accountNumber} Made a monthly payment of ${self.monthly_payment}. Remaining balance: ${user.checking_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(self.monthly_payment, "payment", user.checking_account.accountNumber))
+        print(f"Remaining Balance: {self.calculate_remaining_balance()}\n")
+    
+    def make_monthly_payment_savings(self, user:User):
+        user.withdraw_from_savings(self.monthly_payment)
+        self.balance -= self.monthly_payment
+        print(f"Account: #{user.savings_account.accountNumber} Made a monthly payment of ${self.monthly_payment}. Remaining balance: ${user.savings_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(self.monthly_payment, "payment", user.savings_account.accountNumber))
+        print(f"Remaining Balance: {self.calculate_remaining_balance()}\n")
 
     def calculate_remaining_balance(self):
         return self.loan_amount - self.balance
@@ -109,72 +166,23 @@ class CreditCardAccount(BankAccount):
         else:
             print("Invalid purchase amount or would exceed credit limit.\n")
 
-    def make_payment(self, amount, account:BankAccount):
-        account.withdraw(amount)
+    def make_payment_savings(self, amount, user: User):
+        user.withdraw_from_savings(amount)
         self.balance -= amount
-        print(f"Account: #{account.accountNumber} Made a payment of ${amount}. Remaining balance: ${account.balance}\n")
-        self.transaction_history.add_transaction(Transaction(amount, "payment", account.accountNumber))
+        print(f"Account: #{user.savings_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${user.savings_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "payment", user.savings_account.accountNumber))
+        print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
+    
+    def make_payment_checking(self, amount, user: User):
+        user.withdraw_from_checking(amount)
+        self.balance -= amount
+        print(f"Account: #{user.checking_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${user.checking_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "payment", user.checking_account.accountNumber))
         print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
 
     def calculate_remaining_credit(self):
         return self.credit_limit - self.balance
 
-
-class User:
-    def __init__(self, username, checking_account=None, savings_account=None, loan_account=None, credit_card_account=None):
-        self.username = username
-        self.checking_account = checking_account
-        self.savings_account = savings_account
-        self.loan_account = loan_account
-        self.credit_card_account = credit_card_account
-    
-    def create_checking_account(self, accountNumber, accountHolderName, balance):
-        self.checking_account = CheckingAccount(accountNumber, accountHolderName, balance)
-        print(f"User: {self.username} created checking account: #{accountNumber} with balance: ${balance}.\n")
-    
-    def create_savings_account(self, accountNumber, accountHolderName, balance):
-        self.savings_account = SavingsAccount(accountNumber, accountHolderName, balance)
-        print(f"User: {self.username} created savings account: #{accountNumber} with balance: ${balance}.\n")
-    
-    def create_loan_account(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration, balance):
-        self.loan_account = LoanAccount(accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration, balance)
-        print(f"User: {self.username} created loan account: #{accountNumber} with loan amount: ${loan_amount}.\n")
-    
-    def create_credit_card_account(self, accountNumber, accountHolderName, credit_limit, interest_rate, balance):
-        self.credit_card_account = CreditCardAccount(accountNumber, accountHolderName, credit_limit, interest_rate, balance)
-        print(f"User: {self.username} created credit card account: #{accountNumber} with credit limit: ${credit_limit}.\n")
-    
-    def deposit_to_checking(self, amount):
-        self.checking_account.deposit(amount)
-    
-    def deposit_to_savings(self, amount):
-        self.savings_account.deposit(amount)
-    
-    def withdraw_from_checking(self, amount):
-        self.checking_account.withdraw(amount)
-    
-    def withdraw_from_savings(self, amount):
-        self.savings_account.withdraw(amount)
-    
-    def transfer_to_user_savings(self, amount, user):
-        print(f"User: {self.username} transferring ${amount} to User: {user.username}'s savings account.\n")
-        if self.checking_account.balance >= amount:
-            self.checking_account.withdraw(amount)
-            user.savings_account.deposit(amount)
-            self.checking_account.transaction_history.add_transaction(Transaction(amount, "transfer", user.savings_account.accountNumber))
-            user.savings_account.transaction_history.add_transaction(Transaction(amount, "deposit", user.savings_account.accountNumber))
-        else:
-            print("Insufficient funds for transfer.\n")
-
-    def transfer_to_user_checking(self, amount, user):
-        print(f"User: {self.username} transferring ${amount} to User: {user.username}'s checking account.\n")
-        if self.savings_account.balance >= amount:
-            self.savings_account.withdraw(amount)
-            user.checking_account.deposit(amount)
-            self.savings_account.transaction_history.add_transaction(Transaction(amount, "transfer", user.checking_account.accountNumber))
-            user.checking_account.transaction_history.add_transaction(Transaction(amount, "deposit", user.checking_account.accountNumber))
-        else:
-            print("Insufficient funds for transfer.\n")
 
 class Store:
     def __init__(self, storeName:str, storeOwner: User):
@@ -198,40 +206,49 @@ class Store:
             print("Insufficient funds for refund.\n")
     
 if __name__ == "__main__":
+        # Create two users
+    user1 = User("Alice")
+    user2 = User("Bob")
 
-    user1 = User("user1")
-    user2 = User("user2")
+    # Create checking and savings accounts for both users
+    user1.create_checking_account(123, "Alice", 5000)
+    user1.create_savings_account(456, "Alice", 10000)
+    user2.create_checking_account(789, "Bob", 3000)
+    user2.create_savings_account(101112, "Bob", 8000)
 
-    user1.create_checking_account(123, "user1", 1000)
-    user1.create_savings_account(456, "user1", 500)
+    # Create a loan account for user1
+    user1.create_loan_account(131415, "Alice", 20000, 0.05, 5,)
 
-    user2.create_checking_account(789, "user2", 2000)
-    user2.create_savings_account(101, "user2", 1000)
+    # Create a credit card account for user2
+    user2.create_credit_card_account(161718, "Bob", 5000, 0.18, 0)
 
-    user1.deposit_to_checking(100)
-    user1.deposit_to_savings(50)
+    # User1 deposits to checking account
+    user1.deposit_to_checking(1000)
 
-    user1.withdraw_from_checking(200)
-    user1.withdraw_from_savings(100)
+    # User2 withdraws from savings account
+    user2.withdraw_from_savings(500)
 
-    user2.transfer_to_user_savings(50, user1)
-    user2.transfer_to_user_checking(50, user1)
+    # User1 transfers to user2's savings account
+    user1.transfer_to_user_savings(500, user2)
 
-    print(f"User1 Checking Balance: {user1.checking_account.balance}")
-    print(f"User1 Savings Balance: {user1.savings_account.balance}")
+    # User2 transfers to user1's checking account
+    user2.transfer_to_user_checking(300, user1)
 
-    print(f"User2 Checking Balance: {user2.checking_account.balance}")
-    print(f"User2 Savings Balance: {user2.savings_account.balance}")
+    # User1 makes a monthly payment to loan account from checking account
+    user1.loan_account.make_monthly_payment_checking(user1)
 
-    print(f"User1 Checking Transactions: {user1.checking_account.transaction_history}")
-    print(f"User1 Savings Transactions: {user1.checking_account.transaction_history}")
+    # User2 makes a purchase using credit card account
+    user2.credit_card_account.make_purchase(200)
 
+    # User2 makes a payment to credit card account from checking account
+    user2.credit_card_account.make_payment_checking(200, user2)
 
-    user1.create_loan_account(789, "user1", 10000, 0.05, 12, 0)
-    user1.loan_account.make_payment(200)
+    # Create a store owned by user1
+    store = Store("Alice's Store", user1)
 
-    user1.create_credit_card_account(101, "user1", 5000, 0.1, 0)
-    user1.credit_card_account.make_purchase(1000)
-    user1.credit_card_account.make_payment(500)
+    # User2 buys an item from the store
+    store.sellItem("Item1", 100, user2)
 
+    # The store refunds the item to user2
+    store.refundItem("Item1", 100, user2)
 
