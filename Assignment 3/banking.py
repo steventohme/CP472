@@ -24,6 +24,9 @@ class TransactionHistory:
     def get_all_transactions_of_type(self, transaction_type):
         return [transaction for transaction in self.transactions if transaction.transaction_type == transaction_type]
 
+    def __str__(self):
+        return ", ".join([str(transaction) for transaction in self.transactions])
+
 
 class BankAccount:
     def __init__(self, accountNumber, accountHolderName, balance=0.0):
@@ -216,12 +219,12 @@ if __name__ == "__main__":
     print(f"User2 Checking Balance: {user2.checking_account.balance}")
     print(f"User2 Savings Balance: {user2.savings_account.balance}")
 
-    print(f"User1 Checking Transactions: {user1.checking_account.transaction_history.transactions}")
-    print(f"User1 Savings Transactions: {user1.savings_account.transaction_history.transactions}")
+    print(f"User1 Checking Transactions: {user1.checking_account.transaction_history}")
+    print(f"User1 Savings Transactions: {user1.checking_account.transaction_history}")
 
 
     user1.create_loan_account(789, "user1", 10000, 0.05, 12, 0)
-    user1.loan_account.make_payment(1000)
+    user1.loan_account.make_payment(200)
     print(f"Remaining Loan Balance: {user1.loan_account.calculate_remaining_balance()}")
 
     user1.create_credit_card_account(101, "user1", 5000, 0.1, 0)
