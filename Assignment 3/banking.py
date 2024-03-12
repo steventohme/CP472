@@ -18,12 +18,6 @@ class TransactionHistory:
     def add_transaction(self, transaction):
         self.transactions.append(transaction)
 
-    def get_last_n_transactions(self, n):
-        return self.transactions[-n:]
-
-    def get_all_transactions_of_type(self, transaction_type):
-        return [transaction for transaction in self.transactions if transaction.transaction_type == transaction_type]
-
     def __str__(self):
         return ", ".join([str(transaction) for transaction in self.transactions])
     
