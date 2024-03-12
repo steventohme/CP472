@@ -173,6 +173,12 @@ class CreditCardAccount(BankAccount):
         print(f"Account: #{user.checking_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${user.checking_account.balance}\n")
         self.transaction_history.add_transaction(Transaction(amount, "payment", user.checking_account.accountNumber))
         print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
+    
+    def handleReturn(self, amount):
+        self.balance -= amount
+        print(f"Account: #{self.accountNumber} Returned an item for ${amount}. Remaining credit: ${self.credit_limit - self.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "return", self.accountNumber))
+        print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
 
     def calculate_remaining_credit(self):
         return self.credit_limit - self.balance
@@ -185,22 +191,22 @@ class Store:
     
     def sellItem(self, item:str, price:float, buyer: User):
         print(f"Store: {self.storeName} selling item: {item} for ${price} to User: {buyer.username}.\n")
-        if buyer.credit_card_account.balance >= price:
+        if buyer.credit_card_account.calculate_remaining_credit() >= price:
             buyer.credit_card_account.make_purchase(price)
-            self.storeOwner.credit_card_account.make_payment(price)
+            self.storeOwner.checking_account.deposit(price)
         else:
             print("Insufficient funds for purchase.\n")
     
     def refundItem(self, item:str, price:float, buyer: User):
         print(f"Store: {self.storeName} refunding item: {item} for ${price} to User: {buyer.username}.\n")
         if buyer.credit_card_account.balance >= price:
-            buyer.credit_card_account.make_payment(price)
+            buyer.credit_card_account.handleReturn(price)
             self.storeOwner.credit_card_account.make_purchase(price)
         else:
             print("Insufficient funds for refund.\n")
     
 if __name__ == "__main__":
-        # Create two users
+    # Create two users
     user1 = User("Alice")
     user2 = User("Bob")
 
@@ -213,7 +219,8 @@ if __name__ == "__main__":
     # Create a loan account for user1
     user1.create_loan_account(131415, "Alice", 20000, 0.05, 5,)
 
-    # Create a credit card account for user2
+    # Create a credit card account for user1 and user2
+    user1.create_credit_card_account(141516, "Alice", 10000, 0.15, 0)
     user2.create_credit_card_account(161718, "Bob", 5000, 0.18, 0)
 
     # User1 deposits to checking account
