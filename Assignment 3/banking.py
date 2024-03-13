@@ -1,4 +1,5 @@
 from datetime import datetime
+import unittest
 
 class Transaction:
     def __init__(self, amount, transaction_type, account_number):
@@ -29,20 +30,20 @@ class User:
         self.loan_account = loan_account
         self.credit_card_account = credit_card_account
     
-    def create_checking_account(self, accountNumber, accountHolderName, balance):
-        self.checking_account = CheckingAccount(accountNumber, accountHolderName, balance)
+    def create_checking_account(self, accountNumber, balance):
+        self.checking_account = CheckingAccount(self, accountNumber, balance)
         print(f"User: {self.username} created checking account: #{accountNumber} with balance: ${balance}.\n")
     
-    def create_savings_account(self, accountNumber, accountHolderName, balance):
-        self.savings_account = SavingsAccount(accountNumber, accountHolderName, balance)
+    def create_savings_account(self, accountNumber, balance):
+        self.savings_account = SavingsAccount(self, accountNumber, balance)
         print(f"User: {self.username} created savings account: #{accountNumber} with balance: ${balance}.\n")
     
-    def create_loan_account(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration):
-        self.loan_account = LoanAccount(accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration)
+    def create_loan_account(self, accountNumber, loan_amount, interest_rate, loan_duration):
+        self.loan_account = LoanAccount(self, accountNumber, loan_amount, interest_rate, loan_duration)
         print(f"User: {self.username} created loan account: #{accountNumber} with loan amount: ${loan_amount}.\n")
     
-    def create_credit_card_account(self, accountNumber, accountHolderName, credit_limit, interest_rate, balance):
-        self.credit_card_account = CreditCardAccount(accountNumber, accountHolderName, credit_limit, interest_rate, balance)
+    def create_credit_card_account(self, accountNumber, credit_limit, interest_rate, balance):
+        self.credit_card_account = CreditCardAccount(self, accountNumber, credit_limit, interest_rate, balance)
         print(f"User: {self.username} created credit card account: #{accountNumber} with credit limit: ${credit_limit}.\n")
     
     def deposit_to_checking(self, amount):
@@ -79,8 +80,9 @@ class User:
 
 
 class BankAccount:
-    def __init__(self, user: User, balance:float=0.0):
+    def __init__(self, user: User, accountNumber: int, balance:float=0.0):
         self.user = user
+        self.accountNumber = accountNumber
         self.balance = balance
         self.transaction_history = TransactionHistory()
 
@@ -102,8 +104,8 @@ class BankAccount:
 
 
 class SavingsAccount(BankAccount):
-    def __init__(self, user:User, balance:float=0.0, minBalance:float=100.0):
-        super().__init__(user, balance)
+    def __init__(self, user:User, accountNumber:int, balance:float=0.0, minBalance:float=100.0):
+        super().__init__(user, accountNumber, balance)
         self.minBalance = minBalance
 
     def withdraw(self, amount:float):
@@ -115,8 +117,8 @@ class SavingsAccount(BankAccount):
             print("Invalid withdrawal amount or would violate minimum balance for savings account.\n")
 
 class CheckingAccount(BankAccount):
-    def __init__(self, user:User, balance:float=0.0, insufficient_funds_fee:float=0.35):
-        super().__init__(user, balance)
+    def __init__(self, user:User, accountNumber:int, balance:float=0.0, insufficient_funds_fee:float=0.35):
+        super().__init__(user, accountNumber, balance)
         self.insufficient_funds_fee = insufficient_funds_fee
 
     def withdraw(self, amount:float):
@@ -131,8 +133,8 @@ class CheckingAccount(BankAccount):
 
 
 class LoanAccount(BankAccount):
-    def __init__(self, user:User, loan_amount:float, interest_rate:float, loan_duration:int):
-        super().__init__(user)
+    def __init__(self, user:User, accountNumber:int, loan_amount:float, interest_rate:float, loan_duration:int):
+        super().__init__(user, accountNumber)
         self.loan_amount = loan_amount
         self.interest_rate = interest_rate
         self.loan_duration = loan_duration
@@ -157,8 +159,8 @@ class LoanAccount(BankAccount):
 
 
 class CreditCardAccount(BankAccount):
-    def __init__(self, user: User, credit_limit:float, interest_rate:float, balance=0.0):
-        super().__init__(user, balance)
+    def __init__(self, user: User, accountNumber, credit_limit:float, interest_rate:float, balance=0.0):
+        super().__init__(user, accountNumber, balance)
         self.credit_limit = credit_limit
         self.interest_rate = interest_rate
 
@@ -215,51 +217,63 @@ class Store:
         else:
             print("Insufficient funds for refund.\n")
     
+
+
+class TestBankingSystem(unittest.TestCase):
+    def setUp(self):
+        self.user1 = User("User1")
+        self.user2 = User("User2")
+        self.user1.create_checking_account("123", 500)
+        self.user1.create_savings_account("456", 1000)
+        self.user2.create_checking_account("789", 500)
+        self.user2.create_savings_account("012", 1000)
+
+    def testTransaction(self):
+        # Test Transaction
+        transaction = Transaction(100, "deposit", "123")
+        self.assertEqual(transaction.amount, 100)
+        self.assertEqual(transaction.transaction_type, "deposit")
+        self.assertEqual(transaction.account_number, "123")
+
+    def testTransactionHistory(self):
+        transaction_history = TransactionHistory()
+        transaction = Transaction(100, "deposit", "123")
+        transaction_history.add_transaction(transaction)
+        self.assertEqual(len(transaction_history.transactions), 1)
+
+    def testCheckingAccount(self):
+        self.user1.deposit_to_checking(100)
+        self.assertEqual(self.user1.checking_account.balance, 600)
+        self.user1.withdraw_from_checking(50)
+        self.assertEqual(self.user1.checking_account.balance, 550)
+
+    def testSavingsAccount(self):
+        self.user1.deposit_to_savings(100)
+        self.assertEqual(self.user1.savings_account.balance, 1100)
+        self.user1.withdraw_from_savings(50)
+        self.assertEqual(self.user1.savings_account.balance, 1050)
+
+    def testTransfer(self):
+        self.user1.transfer_to_user_checking(100, self.user2)
+        self.assertEqual(self.user1.checking_account.balance, 500)
+        self.assertEqual(self.user2.checking_account.balance, 600)
+
+    def testLoanAccount(self):
+        self.user1.create_loan_account("345", 5000, 0.05, 12)
+        self.user1.loan_account.make_monthly_payment_checking(self.user1)
+        self.assertLess(self.user1.loan_account.balance, 5000)
+
+    def testCreditCardAccount(self):
+        self.user1.create_credit_card_account("678", 2000, 0.18, 0)
+        self.user1.credit_card_account.make_purchase(100)
+        self.assertEqual(self.user1.credit_card_account.balance, 100)
+
+    def testStore(self):
+        store = Store("Store1", self.user1)
+        self.user2.create_credit_card_account("678", 2000, 0.18, 200)
+        store.sellItem("Item1", 50, self.user2)
+        self.assertEqual(self.user2.credit_card_account.balance, 250)
+
 if __name__ == "__main__":
-    # Create two users
-    user1 = User("Alice")
-    user2 = User("Bob")
-
-    # Create checking and savings accounts for both users
-    user1.create_checking_account(123, "Alice", 5000)
-    user1.create_savings_account(456, "Alice", 10000)
-    user2.create_checking_account(789, "Bob", 3000)
-    user2.create_savings_account(101112, "Bob", 8000)
-
-    # Create a loan account for user1
-    user1.create_loan_account(131415, "Alice", 20000, 0.05, 5,)
-
-    # Create a credit card account for user1 and user2
-    user1.create_credit_card_account(141516, "Alice", 10000, 0.15, 0)
-    user2.create_credit_card_account(161718, "Bob", 5000, 0.18, 0)
-
-    # User1 deposits to checking account
-    user1.deposit_to_checking(1000)
-
-    # User2 withdraws from savings account
-    user2.withdraw_from_savings(500)
-
-    # User1 transfers to user2's savings account
-    user1.transfer_to_user_savings(500, user2)
-
-    # User2 transfers to user1's checking account
-    user2.transfer_to_user_checking(300, user1)
-
-    # User1 makes a monthly payment to loan account from checking account
-    user1.loan_account.make_monthly_payment_checking(user1)
-
-    # User2 makes a purchase using credit card account
-    user2.credit_card_account.make_purchase(200)
-
-    # User2 makes a payment to credit card account from checking account
-    user2.credit_card_account.make_payment_checking(200, user2)
-
-    # Create a store owned by user1
-    store = Store("Alice's Store", user1)
-
-    # User2 buys an item from the store
-    store.sellItem("Item1", 100, user2)
-
-    # The store refunds the item to user2
-    store.refundItem("Item1", 100, user2)
+    unittest.main()
 

@@ -1,22 +1,34 @@
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.time.LocalDateTime;
 
 class Transaction {
     private double amount;
     private String transactionType;
-    private int accountNumber;
-    private LocalDateTime dateTime;
+    private String accountNumber;
+    private Date dateTime;
 
-    public Transaction(double amount, String transactionType, int accountNumber) {
+    public Transaction(double amount, String transactionType, String accountNumber) {
         this.amount = amount;
         this.transactionType = transactionType;
         this.accountNumber = accountNumber;
-        this.dateTime = LocalDateTime.now();
+        this.dateTime = new Date();
     }
 
     public String toString() {
         return dateTime + " - " + transactionType + " of $" + amount + " on account " + accountNumber;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
     }
 }
 
@@ -38,6 +50,10 @@ class TransactionHistory {
         }
         return String.join(", ", transactionStrings);
     }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
 }
 
 class User {
@@ -47,65 +63,76 @@ class User {
     private LoanAccount loanAccount;
     private CreditCardAccount creditCardAccount;
 
-    public User(String username) {
+    public User(String username, CheckingAccount checkingAccount, SavingsAccount savingsAccount,
+            LoanAccount loanAccount, CreditCardAccount creditCardAccount) {
         this.username = username;
+        this.checkingAccount = checkingAccount;
+        this.savingsAccount = savingsAccount;
+        this.loanAccount = loanAccount;
+        this.creditCardAccount = creditCardAccount;
     }
 
-    public void createCheckingAccount(int accountNumber, String accountHolderName, double balance) {
-        checkingAccount = new CheckingAccount(accountNumber, accountHolderName, balance);
-        System.out.println("User: " + username + " created checking account: " + checkingAccount);
+    public void createCheckingAccount(String accountNumber, double balance, double insufficientFundsFee) {
+        this.checkingAccount = new CheckingAccount(this, accountNumber, balance, insufficientFundsFee);
+        System.out.println("User: " + this.username + " created checking account: " + accountNumber);
     }
 
-    public void createSavingsAccount(int accountNumber, String accountHolderName, double balance, double minBalance) {
-        savingsAccount = new SavingsAccount(accountNumber, accountHolderName, balance, minBalance);
-        System.out.println("User: " + username + " created savings account: " + savingsAccount);
+    public void createSavingsAccount(String accountNumber, double balance, double minBalance) {
+        this.savingsAccount = new SavingsAccount(this, accountNumber, balance, minBalance);
+        System.out.println("User: " + this.username + " created savings account: " + accountNumber);
     }
 
-    public void createLoanAccount(int accountNumber, String accountHolderName, double loanAmount, double interestRate, int loanDuration) {
-        loanAccount = new LoanAccount(accountNumber, accountHolderName, loanAmount, interestRate, loanDuration);
-        System.out.println("User: " + username + " created loan account: " + loanAccount);
+    public void createLoanAccount(String accountNumber, double loanAmount, double interestRate, int loanDuration) {
+        this.loanAccount = new LoanAccount(this, accountNumber, loanAmount, interestRate, loanDuration);
+        System.out.println("User: " + this.username + " created loan account: " + accountNumber);
     }
 
-    public void createCreditCardAccount(int accountNumber, String accountHolderName, double creditLimit, double interestRate, double balance) {
-        creditCardAccount = new CreditCardAccount(accountNumber, accountHolderName, creditLimit, interestRate, balance);
-        System.out.println("User: " + username + " created credit card account: " + creditCardAccount);
+    public void createCreditCardAccount(String accountNumber, double creditLimit, double interestRate, double balance) {
+        this.creditCardAccount = new CreditCardAccount(this, accountNumber, creditLimit, interestRate, balance);
+        System.out.println("User: " + this.username + " created credit card account: " + accountNumber);
     }
 
     public void depositToChecking(double amount) {
-        checkingAccount.deposit(amount);
+        this.checkingAccount.deposit(amount);
     }
 
     public void depositToSavings(double amount) {
-        savingsAccount.deposit(amount);
+        this.savingsAccount.deposit(amount);
     }
 
     public void withdrawFromChecking(double amount) {
-        checkingAccount.withdraw(amount);
+        this.checkingAccount.withdraw(amount);
     }
 
     public void withdrawFromSavings(double amount) {
-        savingsAccount.withdraw(amount);
+        this.savingsAccount.withdraw(amount);
     }
 
     public void transferToUserSavings(double amount, User user) {
-        System.out.println("User: " + username + " transferring $" + amount + " to User: " + user.getUsername() + "'s savings account.\n");
-        if (checkingAccount.getBalance() >= amount) {
-            checkingAccount.withdraw(amount);
+        System.out.println("User: " + this.username + " transferring $" + amount + " to User: " + user.getUsername()
+                + "'s savings account.\n");
+        if (this.checkingAccount.getBalance() >= amount) {
+            this.checkingAccount.withdraw(amount);
             user.getSavingsAccount().deposit(amount);
-            checkingAccount.getTransactionHistory().addTransaction(new Transaction(amount, "transfer", user.getSavingsAccount().getAccountNumber()));
-            user.getSavingsAccount().getTransactionHistory().addTransaction(new Transaction(amount, "deposit", user.getSavingsAccount().getAccountNumber()));
+            this.checkingAccount.getTransactionHistory()
+                    .addTransaction(new Transaction(amount, "transfer", user.getSavingsAccount().getAccountNumber()));
+            user.getSavingsAccount().getTransactionHistory()
+                    .addTransaction(new Transaction(amount, "deposit", user.getSavingsAccount().getAccountNumber()));
         } else {
             System.out.println("Insufficient funds for transfer.\n");
         }
     }
 
     public void transferToUserChecking(double amount, User user) {
-        System.out.println("User: " + username + " transferring $" + amount + " to User: " + user.getUsername() + "'s checking account.\n");
-        if (savingsAccount.getBalance() >= amount) {
-            savingsAccount.withdraw(amount);
+        System.out.println("User: " + this.username + " transferring $" + amount + " to User: " + user.getUsername()
+                + "'s checking account.\n");
+        if (this.savingsAccount.getBalance() >= amount) {
+            this.savingsAccount.withdraw(amount);
             user.getCheckingAccount().deposit(amount);
-            savingsAccount.getTransactionHistory().addTransaction(new Transaction(amount, "transfer", user.getCheckingAccount().getAccountNumber()));
-            user.getCheckingAccount().getTransactionHistory().addTransaction(new Transaction(amount, "deposit", user.getCheckingAccount().getAccountNumber()));
+            this.savingsAccount.getTransactionHistory()
+                    .addTransaction(new Transaction(amount, "transfer", user.getCheckingAccount().getAccountNumber()));
+            user.getCheckingAccount().getTransactionHistory()
+                    .addTransaction(new Transaction(amount, "deposit", user.getCheckingAccount().getAccountNumber()));
         } else {
             System.out.println("Insufficient funds for transfer.\n");
         }
@@ -133,68 +160,60 @@ class User {
 }
 
 class BankAccount {
-    private int accountNumber;
-    private String accountHolderName;
-    private double balance;
+    private User user;
+    protected String accountNumber;
+    protected double balance;
     protected TransactionHistory transactionHistory;
 
-    public BankAccount(int accountNumber, String accountHolderName, double balance) {
+    public BankAccount(User user, String accountNumber, double balance) {
+        this.user = user;
         this.accountNumber = accountNumber;
-        this.accountHolderName = accountHolderName;
         this.balance = balance;
         this.transactionHistory = new TransactionHistory();
     }
 
     public void deposit(double amount) {
         if (amount > 0) {
-            balance += amount;
-            System.out.println("Account: " + accountNumber + " - Deposit of $" + amount);
-            transactionHistory.addTransaction(new Transaction(amount, "deposit", accountNumber));
+            this.balance += amount;
+            System.out.println("Account: " + this.accountNumber + " - Deposited $" + amount);
+            this.transactionHistory.addTransaction(new Transaction(amount, "deposit", this.accountNumber));
         } else {
             System.out.println("Invalid deposit amount.\n");
         }
     }
 
     public void withdraw(double amount) {
-        if (amount > 0 && amount <= balance) {
-            balance -= amount;
-            System.out.println("Account: " + accountNumber + " - Withdrawal of $" + amount);
-            transactionHistory.addTransaction(new Transaction(amount, "withdrawal", accountNumber));
+        if (amount > 0 && amount <= this.balance) {
+            this.balance -= amount;
+            System.out.println("Account: " + this.accountNumber + " - Withdrew $" + amount);
+            this.transactionHistory.addTransaction(new Transaction(amount, "withdrawal", this.accountNumber));
         } else {
             System.out.println("Invalid withdrawal amount or insufficient funds.\n");
         }
-    }
-
-    public int getAccountNumber() {
-        return accountNumber;
-    }
-
-    public String getAccountHolderName() {
-        return accountHolderName;
     }
 
     public double getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
     public TransactionHistory getTransactionHistory() {
         return transactionHistory;
     }
 
-    public String toString() {
-        return accountNumber + " - " + accountHolderName;
+    public User getUser() {
+        return user;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
     }
 }
 
 class SavingsAccount extends BankAccount {
     private double minBalance;
 
-    public SavingsAccount(int accountNumber, String accountHolderName, double balance, double minBalance) {
-        super(accountNumber, accountHolderName, balance);
+    public SavingsAccount(User user, String accountNumber, double balance, double minBalance) {
+        super(user, accountNumber, balance);
         this.minBalance = minBalance;
     }
 
@@ -208,8 +227,22 @@ class SavingsAccount extends BankAccount {
 }
 
 class CheckingAccount extends BankAccount {
-    public CheckingAccount(int accountNumber, String accountHolderName, double balance) {
-        super(accountNumber, accountHolderName, balance);
+    private double insufficientFundsFee;
+
+    public CheckingAccount(User user, String accountNumber, double balance, double insufficientFundsFee) {
+        super(user, accountNumber, balance);
+        this.insufficientFundsFee = insufficientFundsFee;
+    }
+
+    public void withdraw(double amount) {
+        if (amount > 0 && (getBalance() - amount) >= 0) {
+            super.withdraw(amount);
+        } else {
+            System.out.println("Invalid withdrawal amount or insufficient funds.\n");
+            this.balance -= this.insufficientFundsFee;
+            System.out.println("Account: " + this.accountNumber + " - Charged insufficient funds fee: $"
+                    + this.insufficientFundsFee);
+        }
     }
 }
 
@@ -219,33 +252,35 @@ class LoanAccount extends BankAccount {
     private int loanDuration;
     private double monthlyPayment;
 
-    public LoanAccount(int accountNumber, String accountHolderName, double loanAmount, double interestRate, int loanDuration) {
-        super(accountNumber, accountHolderName, 0);
+    public LoanAccount(User user, String accountNumber, double loanAmount, double interestRate, int loanDuration) {
+        super(user, accountNumber, 0);
         this.loanAmount = loanAmount;
         this.interestRate = interestRate;
         this.loanDuration = loanDuration;
-        this.monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, loanDuration)) / (Math.pow(1 + interestRate, loanDuration) - 1);
+        this.monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, loanDuration))
+                / (Math.pow(1 + interestRate, loanDuration) - 1);
     }
 
     public void makeMonthlyPaymentChecking(User user) {
-        user.withdrawFromChecking(monthlyPayment);
-        setBalance(getBalance() - monthlyPayment);
-        System.out.println("Account: " + getAccountNumber() + " - Payment of $" + monthlyPayment);
-        transactionHistory.addTransaction(new Transaction(monthlyPayment, "payment", user.getCheckingAccount().getAccountNumber()));
+        user.withdrawFromChecking(this.monthlyPayment);
+        this.balance -= this.monthlyPayment;
+        System.out.println("Account: " + this.accountNumber + " - Made monthly payment: $" + this.monthlyPayment);
+        this.transactionHistory.addTransaction(
+                new Transaction(this.monthlyPayment, "payment", user.getCheckingAccount().getAccountNumber()));
         System.out.println("Remaining Balance: " + calculateRemainingBalance() + "\n");
     }
 
-
     public void makeMonthlyPaymentSavings(User user) {
-        user.withdrawFromSavings(monthlyPayment);
-        setBalance(getBalance() - monthlyPayment);
-        System.out.println("Account: " + getAccountNumber() + " - Payment of $" + monthlyPayment);
-        transactionHistory.addTransaction(new Transaction(monthlyPayment, "payment", user.getSavingsAccount().getAccountNumber()));
+        user.withdrawFromSavings(this.monthlyPayment);
+        this.balance -= this.monthlyPayment;
+        System.out.println("Account: " + this.accountNumber + " - Made monthly payment: $" + this.monthlyPayment);
+        this.transactionHistory.addTransaction(
+                new Transaction(this.monthlyPayment, "payment", user.getSavingsAccount().getAccountNumber()));
         System.out.println("Remaining Balance: " + calculateRemainingBalance() + "\n");
     }
 
     public double calculateRemainingBalance() {
-        return loanAmount - getBalance();
+        return this.loanAmount - this.balance;
     }
 }
 
@@ -253,8 +288,8 @@ class CreditCardAccount extends BankAccount {
     private double creditLimit;
     private double interestRate;
 
-    public CreditCardAccount(int accountNumber, String accountHolderName, double creditLimit, double interestRate, double balance) {
-        super(accountNumber, accountHolderName, balance);
+    public CreditCardAccount(User user, String accountNumber, double creditLimit, double interestRate, double balance) {
+        super(user, accountNumber, balance);
         this.creditLimit = creditLimit;
         this.interestRate = interestRate;
     }
@@ -262,37 +297,40 @@ class CreditCardAccount extends BankAccount {
     public void makePurchase(double amount) {
         if (amount > 0 && (getBalance() + amount) <= creditLimit) {
             super.deposit(amount);
-            System.out.println("Account: " + getAccountNumber() + " - Purchase of $" + amount);
-            transactionHistory.addTransaction(new Transaction(amount, "purchase", getAccountNumber()));
+            System.out.println("Account: " + this.accountNumber + " - Made purchase: $" + amount);
+            this.transactionHistory.addTransaction(new Transaction(amount, "purchase", this.accountNumber));
         } else {
             System.out.println("Invalid purchase amount or would exceed credit limit.\n");
         }
     }
 
-    public void makePaymentSavings(double amount, User user) {
-        user.withdrawFromSavings(amount);
-        setBalance(getBalance() - amount);
-        System.out.println("Account: " + getAccountNumber() + " - Payment of $" + amount);
-        transactionHistory.addTransaction(new Transaction(amount, "payment", user.getSavingsAccount().getAccountNumber()));
+    public void makePaymentSavings(double amount) {
+        getUser().withdrawFromSavings(amount);
+        this.balance -= amount;
+        System.out.println("Account: " + this.accountNumber + " - Made payment: $" + amount);
+        this.transactionHistory
+                .addTransaction(new Transaction(amount, "payment", getUser().getSavingsAccount().getAccountNumber()));
         System.out.println("Remaining Credit: " + calculateRemainingCredit() + "\n");
     }
 
-    public void makePaymentChecking(double amount, User user) {
-        user.withdrawFromChecking(amount);
-        setBalance(getBalance() - amount);
-        System.out.println("Account: " + getAccountNumber() + " - Payment of $" + amount);
-        transactionHistory.addTransaction(new Transaction(amount, "payment", user.getCheckingAccount().getAccountNumber()));
+    public void makePaymentChecking(double amount) {
+        getUser().withdrawFromChecking(amount);
+        this.balance -= amount;
+        System.out.println("Account: " + this.accountNumber + " - Made payment: $" + amount);
+        this.transactionHistory
+                .addTransaction(new Transaction(amount, "payment", getUser().getCheckingAccount().getAccountNumber()));
         System.out.println("Remaining Credit: " + calculateRemainingCredit() + "\n");
     }
 
     public void handleReturn(double amount) {
-        super.withdraw(amount);
-        System.out.println("Account: " + getAccountNumber() + " - Return of $" + amount);
-        transactionHistory.addTransaction(new Transaction(amount, "return", getAccountNumber()));
+        this.balance -= amount;
+        System.out.println("Account: " + this.accountNumber + " - Handled return: $" + amount);
+        this.transactionHistory.addTransaction(new Transaction(amount, "return", this.accountNumber));
+        System.out.println("Remaining Credit: " + calculateRemainingCredit() + "\n");
     }
 
     public double calculateRemainingCredit() {
-        return creditLimit - getBalance();
+        return this.creditLimit - this.balance;
     }
 }
 
@@ -306,20 +344,22 @@ class Store {
     }
 
     public void sellItem(String item, double price, User buyer) {
-        System.out.println("Store: " + storeName + " selling item: " + item + " for $" + price + " to User: " + buyer.getUsername() + ".\n");
-        if (buyer.getCreditCardAccount().getBalance() >= price) {
+        System.out.println("Store: " + this.storeName + " selling item: " + item + " for $" + price + " to User: "
+                + buyer.getUsername() + ".\n");
+        if (buyer.getCreditCardAccount().calculateRemainingCredit() >= price) {
             buyer.getCreditCardAccount().makePurchase(price);
-            storeOwner.getCheckingAccount().deposit(price);;
+            this.storeOwner.getCheckingAccount().deposit(price);
         } else {
             System.out.println("Insufficient funds for purchase.\n");
         }
     }
 
     public void refundItem(String item, double price, User buyer) {
-        System.out.println("Store: " + storeName + " refunding item: " + item + " for $" + price + " to User: " + buyer.getUsername() + ".\n");
+        System.out.println("Store: " + this.storeName + " refunding item: " + item + " for $" + price + " to User: "
+                + buyer.getUsername() + ".\n");
         if (buyer.getCreditCardAccount().getBalance() >= price) {
             buyer.getCreditCardAccount().handleReturn(price);
-            storeOwner.getCreditCardAccount().makePurchase(price);
+            this.storeOwner.getCreditCardAccount().makePurchase(price);
         } else {
             System.out.println("Insufficient funds for refund.\n");
         }
@@ -327,39 +367,81 @@ class Store {
 }
 
 public class banking {
-    public static void main(String[] args) {
-        User user1 = new User("Alice");
-        User user2 = new User("Bob");
+    private User user1;
+    private User user2;
 
-        user1.createCheckingAccount(123, "Alice", 5000);
-        user1.createSavingsAccount(456, "Alice", 10000, 100);
-        user2.createCheckingAccount(789, "Bob", 3000);
-        user2.createSavingsAccount(101112, "Bob", 8000, 100);
+    public void setUp() {
+        user1 = new User("User1", null, null, null, null);
+        user2 = new User("User2", null, null, null, null);
+        user1.createCheckingAccount("123", 500, 0.35);
+        user1.createSavingsAccount("456", 1000, 200);
+        user2.createCheckingAccount("789", 500, 0.35);
+        user2.createSavingsAccount("012", 1000, 200);
+    }
 
-        user1.createLoanAccount(131415, "Alice", 20000, 0.05, 5);
+    public void testTransaction() {
+        Transaction transaction = new Transaction(100, "deposit", "123");
+        assert transaction.getAmount() == 100;
+        assert transaction.getTransactionType().equals("deposit");
+        assert transaction.getAccountNumber().equals("123");
+    }
 
-        user2.createCreditCardAccount(161718, "Bob", 5000, 0.18, 0);
+    public void testTransactionHistory() {
+        TransactionHistory transactionHistory = new TransactionHistory();
+        Transaction transaction = new Transaction(100, "deposit", "123");
+        transactionHistory.addTransaction(transaction);
+        assert transactionHistory.getTransactions().size() == 1;
+    }
 
-        user1.depositToChecking(1000);
+    public void testCheckingAccount() {
+        user1.depositToChecking(100);
+        assert user1.getCheckingAccount().getBalance() == 600;
+        user1.withdrawFromChecking(50);
+        assert user1.getCheckingAccount().getBalance() == 550;
+    }
 
-        user2.withdrawFromSavings(500);
+    public void testSavingsAccount() {
+        user1.depositToSavings(100);
+        assert user1.getSavingsAccount().getBalance() == 1100;
+        user1.withdrawFromSavings(50);
+        assert user1.getSavingsAccount().getBalance() == 1050;
+    }
 
-        user1.transferToUserSavings(500, user2);
+    public void testTransfer() {
+        user1.transferToUserChecking(100, user2);
+        assert user1.getCheckingAccount().getBalance() == 500;
+        assert user2.getCheckingAccount().getBalance() == 600;
+    }
 
-        user2.transferToUserChecking(300, user1);
-
+    public void testLoanAccount() {
+        user1.createLoanAccount("345", 5000, 0.05, 12);
         user1.getLoanAccount().makeMonthlyPaymentChecking(user1);
+        assert user1.getLoanAccount().getBalance() < 5000;
+    }
 
-        user2.getCreditCardAccount().makePurchase(200);
+    public void testCreditCardAccount() {
+        user1.createCreditCardAccount("678", 2000, 0.18, 0);
+        user1.getCreditCardAccount().makePurchase(100);
+        assert user1.getCreditCardAccount().getBalance() == 100;
+    }
 
-        user2.getCreditCardAccount().makePaymentChecking(200, user2);
+    public void testStore() {
+        Store store = new Store("Store1", user1);
+        user2.createCreditCardAccount("678", 2000, 0.18, 200);
+        store.sellItem("Item1", 50, user2);
+        assert user2.getCreditCardAccount().getBalance() == 250;
+    }
 
-        Store store = new Store("Alice's Store", user1);
-
-        store.sellItem("Item1", 100, user2);
-
-        store.refundItem("Item1", 100, user2);
+    public static void main(String[] args) {
+        banking testBankingSystem = new banking();
+        testBankingSystem.setUp();
+        testBankingSystem.testTransaction();
+        testBankingSystem.testTransactionHistory();
+        testBankingSystem.testCheckingAccount();
+        testBankingSystem.testSavingsAccount();
+        testBankingSystem.testTransfer();
+        testBankingSystem.testLoanAccount();
+        testBankingSystem.testCreditCardAccount();
+        testBankingSystem.testStore();
     }
 }
-
-
