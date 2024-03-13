@@ -2,7 +2,7 @@ from datetime import datetime
 import unittest
 
 class Transaction:
-    def __init__(self, amount, transaction_type, account_number):
+    def __init__(self, amount:float, transaction_type:str, account_number:int):
         self.amount = amount
         self.transaction_type = transaction_type
         self.account_number = account_number
@@ -16,7 +16,7 @@ class TransactionHistory:
     def __init__(self):
         self.transactions = []
 
-    def add_transaction(self, transaction):
+    def add_transaction(self, transaction:Transaction):
         self.transactions.append(transaction)
 
     def __str__(self):
@@ -30,35 +30,35 @@ class User:
         self.loan_account = loan_account
         self.credit_card_account = credit_card_account
     
-    def create_checking_account(self, accountNumber, balance):
-        self.checking_account = CheckingAccount(self, accountNumber, balance)
+    def create_checking_account(self, accountNumber:int, balance:float, insufficient_funds_fee:float=0.35):
+        self.checking_account = CheckingAccount(self, accountNumber, balance, insufficient_funds_fee)
         print(f"User: {self.username} created checking account: #{accountNumber} with balance: ${balance}.\n")
     
-    def create_savings_account(self, accountNumber, balance):
-        self.savings_account = SavingsAccount(self, accountNumber, balance)
+    def create_savings_account(self, accountNumber:int, balance:float, minBalance:float=100.0):
+        self.savings_account = SavingsAccount(self, accountNumber, balance, minBalance)
         print(f"User: {self.username} created savings account: #{accountNumber} with balance: ${balance}.\n")
     
-    def create_loan_account(self, accountNumber, loan_amount, interest_rate, loan_duration):
+    def create_loan_account(self, accountNumber:int, loan_amount:float, interest_rate:float, loan_duration:int):
         self.loan_account = LoanAccount(self, accountNumber, loan_amount, interest_rate, loan_duration)
         print(f"User: {self.username} created loan account: #{accountNumber} with loan amount: ${loan_amount}.\n")
     
-    def create_credit_card_account(self, accountNumber, credit_limit, interest_rate, balance):
+    def create_credit_card_account(self, accountNumber:int, credit_limit:float, interest_rate:float, balance:float):
         self.credit_card_account = CreditCardAccount(self, accountNumber, credit_limit, interest_rate, balance)
         print(f"User: {self.username} created credit card account: #{accountNumber} with credit limit: ${credit_limit}.\n")
     
-    def deposit_to_checking(self, amount):
+    def deposit_to_checking(self, amount:float):
         self.checking_account.deposit(amount)
     
-    def deposit_to_savings(self, amount):
+    def deposit_to_savings(self, amount:float):
         self.savings_account.deposit(amount)
     
-    def withdraw_from_checking(self, amount):
+    def withdraw_from_checking(self, amount:float):
         self.checking_account.withdraw(amount)
     
-    def withdraw_from_savings(self, amount):
+    def withdraw_from_savings(self, amount:float):
         self.savings_account.withdraw(amount)
     
-    def transfer_to_user_savings(self, amount, user):
+    def transfer_to_user_savings(self, amount:float, user):
         print(f"User: {self.username} transferring ${amount} to User: {user.username}'s savings account.\n")
         if self.checking_account.balance >= amount:
             self.checking_account.withdraw(amount)
@@ -229,7 +229,6 @@ class TestBankingSystem(unittest.TestCase):
         self.user2.create_savings_account("012", 1000)
 
     def testTransaction(self):
-        # Test Transaction
         transaction = Transaction(100, "deposit", "123")
         self.assertEqual(transaction.amount, 100)
         self.assertEqual(transaction.transaction_type, "deposit")
