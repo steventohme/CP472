@@ -79,13 +79,12 @@ class User:
 
 
 class BankAccount:
-    def __init__(self, accountNumber, accountHolderName, balance=0.0):
-        self.accountNumber = accountNumber
-        self.accountHolderName = accountHolderName
+    def __init__(self, user: User, balance:float=0.0):
+        self.user = user
         self.balance = balance
         self.transaction_history = TransactionHistory()
 
-    def deposit(self, amount):
+    def deposit(self, amount:float):
         if amount > 0:
             self.balance += amount
             print(f"Account: #{self.accountNumber} Deposited ${amount}. New balance: ${self.balance}\n")
@@ -93,7 +92,7 @@ class BankAccount:
         else:
             print("Invalid deposit amount.\n")
 
-    def withdraw(self, amount):
+    def withdraw(self, amount:float):
         if amount > 0 and amount <= self.balance:
             self.balance -= amount
             print(f"Account: #{self.accountNumber} Withdrew ${amount}. New balance: ${self.balance}\n")
@@ -103,11 +102,11 @@ class BankAccount:
 
 
 class SavingsAccount(BankAccount):
-    def __init__(self, accountNumber, accountHolderName, balance=0.0, minBalance=100.0):
-        super().__init__(accountNumber, accountHolderName, balance)
+    def __init__(self, user:User, balance:float=0.0, minBalance:float=100.0):
+        super().__init__(user, balance)
         self.minBalance = minBalance
 
-    def withdraw(self, amount):
+    def withdraw(self, amount:float):
         if amount > 0 and (self.balance - amount) >= self.minBalance:
             self.balance -= amount
             print(f"Account: #{self.accountNumber} Withdrew ${amount}. New balance: ${self.balance}\n")
@@ -116,13 +115,24 @@ class SavingsAccount(BankAccount):
             print("Invalid withdrawal amount or would violate minimum balance for savings account.\n")
 
 class CheckingAccount(BankAccount):
-    def __init__(self, accountNumber, accountHolderName, balance=0.0):
-        super().__init__(accountNumber, accountHolderName, balance)
+    def __init__(self, user:User, balance:float=0.0, insufficient_funds_fee:float=0.35):
+        super().__init__(user, balance)
+        self.insufficient_funds_fee = insufficient_funds_fee
+
+    def withdraw(self, amount:float):
+        if amount > 0 and (self.balance - amount) >= 0:
+            self.balance -= amount
+            print(f"Account: #{self.accountNumber} Withdrew ${amount}. New balance: ${self.balance}\n")
+            self.transaction_history.add_transaction(Transaction(amount, "withdrawal", self.accountNumber))
+        else:
+            print("Invalid withdrawal amount or insufficient funds.\n")
+            self.balance -= self.insufficient_funds_fee
+            print(f"Account: #{self.accountNumber} Charged an insufficient funds fee of ${self.insufficient_funds_fee}. New balance: ${self.balance}\n")
 
 
 class LoanAccount(BankAccount):
-    def __init__(self, accountNumber, accountHolderName, loan_amount, interest_rate, loan_duration):
-        super().__init__(accountNumber, accountHolderName)
+    def __init__(self, user:User, loan_amount:float, interest_rate:float, loan_duration:int):
+        super().__init__(user)
         self.loan_amount = loan_amount
         self.interest_rate = interest_rate
         self.loan_duration = loan_duration
@@ -147,8 +157,8 @@ class LoanAccount(BankAccount):
 
 
 class CreditCardAccount(BankAccount):
-    def __init__(self, accountNumber, accountHolderName, credit_limit, interest_rate, balance=0.0):
-        super().__init__(accountNumber, accountHolderName, balance)
+    def __init__(self, user: User, credit_limit:float, interest_rate:float, balance=0.0):
+        super().__init__(user, balance)
         self.credit_limit = credit_limit
         self.interest_rate = interest_rate
 
@@ -160,21 +170,21 @@ class CreditCardAccount(BankAccount):
         else:
             print("Invalid purchase amount or would exceed credit limit.\n")
 
-    def make_payment_savings(self, amount, user: User):
-        user.withdraw_from_savings(amount)
+    def make_payment_savings(self, amount:float):
+        self.user.withdraw_from_savings(amount)
         self.balance -= amount
-        print(f"Account: #{user.savings_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${user.savings_account.balance}\n")
-        self.transaction_history.add_transaction(Transaction(amount, "payment", user.savings_account.accountNumber))
+        print(f"Account: #{self.user.savings_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${self.user.savings_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "payment", self.user.savings_account.accountNumber))
         print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
     
-    def make_payment_checking(self, amount, user: User):
-        user.withdraw_from_checking(amount)
+    def make_payment_checking(self, amount:float):
+        self.user.withdraw_from_checking(amount)
         self.balance -= amount
-        print(f"Account: #{user.checking_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${user.checking_account.balance}\n")
-        self.transaction_history.add_transaction(Transaction(amount, "payment", user.checking_account.accountNumber))
+        print(f"Account: #{self.user.checking_account.accountNumber} Made a payment of ${amount}. Remaining balance: ${self.user.checking_account.balance}\n")
+        self.transaction_history.add_transaction(Transaction(amount, "payment", self.user.checking_account.accountNumber))
         print(f"Remaining Credit: {self.calculate_remaining_credit()}\n")
     
-    def handleReturn(self, amount):
+    def handleReturn(self, amount:float):
         self.balance -= amount
         print(f"Account: #{self.accountNumber} Returned an item for ${amount}. Remaining credit: ${self.credit_limit - self.balance}\n")
         self.transaction_history.add_transaction(Transaction(amount, "return", self.accountNumber))
