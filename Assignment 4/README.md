@@ -1,5 +1,5 @@
 # Assignment 4 Specifications
 
-Version: Racket8.12
+Version: Racket 8.12
 
 Interpreter: racket
